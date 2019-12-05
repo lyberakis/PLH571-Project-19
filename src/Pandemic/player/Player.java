@@ -59,6 +59,7 @@ public class Player{
               if (pandemicBoard.playerPile.get(0).equals(Variables.isEpidemic)) {            	  
             	  System.out.println("-----EPIDEMIC DRAWN!-----");
                   pandemicBoard.resolveEpidemic();//follow the steps for epidemic event
+                  pandemicBoard.playerPile.remove(0);
                   break;
               }
               else 
@@ -352,7 +353,7 @@ public class Player{
   {
 	 // driveCity(playerPiece.getLocation(),playerPiece.getLocation().getNeighbors().get(0)); 
 	  //take Variables.Suggestions and build model for others player
-      /*System.out.print(this.getPlayerName() + " is thinking..... ");
+      System.out.print(this.getPlayerName() + " is thinking..... ");
       boolean checkCure = checkCureWorthIt();
       if (checkCure)
       {
@@ -384,8 +385,6 @@ public class Player{
           driveRandom();
       }
       tactic--;
-      */
-	  
   }
   
   
