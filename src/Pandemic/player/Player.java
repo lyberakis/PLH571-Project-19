@@ -349,42 +349,66 @@ public class Player{
   //---------------------------------------------------------------------------------
   
   
-  public void makeDecision(ArrayList<City>  friend_hand,String Role)
+  public void makeDecision(ArrayList<City>  friend_hand, String Role)
   {
-	 // driveCity(playerPiece.getLocation(),playerPiece.getLocation().getNeighbors().get(0)); 
+	  // driveCity(playerPiece.getLocation(),playerPiece.getLocation().getNeighbors().get(0)); 
 	  //take Variables.Suggestions and build model for others player
-      System.out.print(this.getPlayerName() + " is thinking..... ");
-      boolean checkCure = checkCureWorthIt();
-      if (checkCure)
-      {
-          System.out.println("might be worth trying to find a cure.");
-          checkTryCure();
-      }
-      if (!checkCure && (getDistanceResearch() > 3) && (tactic > 0) )
-      {
-          tactic--;
-          System.out.print("They are far enough from a research station to consider building one.");
-          if (!buildResearchStation())
-          {
-              System.out.println(" Can't find the required card.");
-              rollDice();
-          }
-      }
-      else if (!checkCure)
-      {
-    	  rollDice();
-    	  rollDice();
-    	  rollDice();
-    	  rollDice();
-          tactic--;
-      }
+	  
+	  // This is going to be called 4 times
+	  if (friend_hand == null) { // Our turn
+		  // ==============================================================================
+		  System.out.println(Variables.Suggestions.length);
+		  for (ArrayList<Action> suggestion : Variables.Suggestions) {
+			  // Variables.Suggestions is an array of 4 arrays
+			  // Variables.Suggestions has an empty array (current user's)
+       		  // suggestion is an array of 4 Actions
+			  System.out.println(suggestion);			  
+		  }
+		  
+		  // Getting info for the players
+		  // this.pandemicBoard.playerPieces[0].owner.playerName;
+		  // ==============================================================================
+		  
+		  // Strategy...
+		  System.out.print(this.getPlayerName() + " is thinking..... ");
+	      boolean checkCure = checkCureWorthIt();
+	      if (checkCure)
+	      {
+	          System.out.println("might be worth trying to find a cure.");
+	          checkTryCure();
+	      }
+	      if (!checkCure && (getDistanceResearch() > 3) && (tactic > 0) )
+	      {
+	          tactic--;
+	          System.out.print("They are far enough from a research station to consider building one.");
+	          if (!buildResearchStation())
+	          {
+	              System.out.println(" Can't find the required card.");
+	              rollDice();
+	          }
+	      }
+	      else if (!checkCure)
+	      {
+	    	  rollDice();
+	    	  rollDice();
+	    	  rollDice();
+	    	  rollDice();
+	          tactic--;
+	      }
+	      
+	      if (tactic < -500 )
+	      {
+	          System.out.println("out of ideas, will drive randomly");
+	          driveRandom();
+	      }
+	      tactic--;
+	      
+	  } else { // Send a suggestion
+		  directFlight tmp = new directFlight(this.playerPiece.location.getNeighbors().get(0), this.getHand());
+		  suggestions.add(tmp);
+		  decreasePlayerAction(); // Player has only 4 moves!
+	  }
       
-      if (tactic < -500 )
-      {
-          System.out.println("out of ideas, will drive randomly");
-          driveRandom();
-      }
-      tactic--;
   }
   
   
