@@ -250,7 +250,7 @@ public class Player{
 	  // System.out.println(getPlayerName() + " wants to flying from " + 
 	  // location.getName() + " to "+ destination.getName() + 
 	  // " on a charter flight");
-	  charterFlight tmp = new charterFlight(location,getHand());
+	  charterFlight tmp = new charterFlight(location,getHand(), destination);
       if (tmp.isaLegalMove() && playerPiece.getLocation().equals(location))
       {
           System.out.println(getPlayerName() + " takes a charter flight to " + 
