@@ -353,9 +353,9 @@ public class Player{
   {
 	  // driveCity(playerPiece.getLocation(),playerPiece.getLocation().getNeighbors().get(0)); 
 	  //take Variables.Suggestions and build model for others player
-	  
+
 	  // This is going to be called 4 times
-	  if (friend_hand == null) { // Our turn
+      if (friend_hand == null) { // Our turn
 		  // ==============================================================================
 		  System.out.println(Variables.Suggestions.length);
 		  for (ArrayList<Action> suggestion : Variables.Suggestions) {
@@ -407,11 +407,48 @@ public class Player{
 		  directFlight tmp = new directFlight(this.playerPiece.location.getNeighbors().get(0), this.getHand());
 		  suggestions.add(tmp);
 		  decreasePlayerAction(); // Player has only 4 moves!
-	  }
+      }
+      
+      System.out.println("Util: " + evaluate(this.pandemicBoard));
       
   }
   
   
+  private float evaluate(GameBoard board) {
+        float discountFactor = 1.0f;
+        // float diseaseCountMod = (board.outbreakCount+1)/Variables.MAX_NUMBER_OF_OUTBREAK;
+        float diseaseCountMod = (board.outbreakCount+1);
+        discountFactor -= (0.02*diseaseCountMod) * board.get2CubeCities().size();
+        discountFactor -= (0.01*diseaseCountMod) * board.get1CubeCities().size();
+        discountFactor -= (0.03*diseaseCountMod) * board.get3CubeCities().size();
+        
+        discountFactor += (0.05) * board.getResearchCentre().size();
+        for (Disease disease : board.diseases) {
+            // modify for disease color
+            if (disease.cured) {
+                discountFactor += (0.1);
+            }
+            else {
+                discountFactor -= (0.1);
+            }
+        }
+
+        int numberOfCards = board.playerPile.size();
+        if (numberOfCards <= 44 && numberOfCards >= 34) {
+            // discountFactor -= (0.01);
+        }
+        else if (numberOfCards <= 33 && numberOfCards >= 24) {
+            discountFactor -= (0.01);
+        }
+        else if (numberOfCards <= 23 && numberOfCards >= 14) {
+            discountFactor -= (0.25);
+        }
+        else {
+            discountFactor -= (0.5);
+        }
+
+        return 100.f*discountFactor;
+  }
 
 //Player will either treat disease or go to a city with 3 cubes.
   public void rollDice()
