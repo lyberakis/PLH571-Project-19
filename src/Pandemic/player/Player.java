@@ -1,5 +1,6 @@
 package Pandemic.player;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Random;
 
 import Pandemic.Gameboard.GameBoard;
@@ -379,11 +380,56 @@ public class Player{
 
 
   private void decideScientist() {
-    if(!checkTryCure()) {
+    decideDoctor();
+  }
+
+  void decideOpsExpert() {
+    City hub = getDiseaseHub();
+
+    if(hub == null) {
+        decideDoctor();
+        return;
+    }
+
+    if (playerPiece.location.getName().equals(hub.getName())) {
+        if(!buildResearchStation()) {
+            decideDoctor();
+            return;
+        }
+        else {
+            return;
+        }
+    }
+
+    getDistances(new ArrayList<City>(Arrays.asList(hub)));
+    City toDriveTo = calculateDestination();
+
+    if (!driveCity(playerPiece.location, toDriveTo)) {
+        decideDoctor();
+    }
+    
+  }
+
+  private void decideQuarantineSpecialist() {
+    City hub = getDiseaseHub();
+    
+    if(hub == null) {
+        decideDoctor();
+        return;
+    }
+
+    if (playerPiece.location.getName().equals(hub.getName())) {
+        decideDoctor();
+        return;
+    }
+
+    getDistances(new ArrayList<City>(Arrays.asList(hub)));
+    City toDriveTo = calculateDestination();
+
+    if (!driveCity(playerPiece.location, toDriveTo)) {
         decideDoctor();
     }
   }
-
   
   public void makeDecision(ArrayList<City>  friend_hand, String Role)
   {
@@ -395,18 +441,26 @@ public class Player{
         // freeze();
         System.out.println("Util: " + evaluate(this.pandemicBoard));
         // decideDoctor();
-        switch (Role) {
-            case "MEDIC":
-                decideDoctor();
-                break;
-            case "SCIENTIST":
-                decideScientist();
-                break;
-            default:
-                decideDoctor();
-                break;
+        if(!checkTryCure()) {
+            switch (Role) {
+                case "MEDIC":
+                    decideDoctor();
+                    break;
+                case "SCIENTIST":
+                    decideScientist();
+                    break;
+                case "OPERATIONS_EXPERT":
+                    decideOpsExpert();
+                    break;
+                case "QUARANTINE_SPECIALIST":
+                    decideQuarantineSpecialist();
+                    break;
+                default:
+                    decideDoctor();
+                    break;
+            }
         }
-
+        
         // hand
         // ArrayList<City> neighbors = playerPiece.getLocationConnections();
 
@@ -466,6 +520,25 @@ public class Player{
   }
   
   
+  private City getDiseaseHub() {
+      City hub = null;
+      int maxCubes = 0;
+      for (City city : pandemicBoard.get3CubeCities()) {
+          int cubes = city.getMaxCube();
+          for (City neighbor : city.getNeighbors()) {
+            cubes += neighbor.getMaxCube();
+          }
+
+          if (cubes > maxCubes) {
+            maxCubes = cubes;
+            hub = city;
+          }
+      }
+
+      return hub;
+  }
+
+
   private float evaluate(GameBoard board) {
         float discountFactor = 1.0f;
         // float diseaseCountMod = (board.outbreakCount+1)/Variables.MAX_NUMBER_OF_OUTBREAK;
@@ -488,7 +561,7 @@ public class Player{
         int numberOfCards = board.playerPile.size();
         if (numberOfCards <= 44 && numberOfCards >= 34) {
             // discountFactor -= (0.01);
-        }
+            }
         else if (numberOfCards <= 33 && numberOfCards >= 24) {
             discountFactor -= (0.01);
         }
@@ -556,7 +629,7 @@ public class Player{
       City locationCity = playerPiece.getLocation();
       if (locationCity.getMaxCube() >= threshold)
       {
-          System.out.println("As there are " + threshold + " cubes in " + locationCity.getName() + " " + this.getPlayerName() + " will try and treat disease.");
+          System.out.println("As there are " + locationCity.getMaxCube() + " cubes in " + locationCity.getName() + " " + this.getPlayerName() + " will try and treat disease.");
           String locationColour = locationCity.getColour();
           treatDisease(locationCity,locationColour);
           toReturn = true;
@@ -580,8 +653,15 @@ public class Player{
               return true;
           }
           else{
-              System.out.println("They need to go to a researh station.");
-              tryDriveResearchStation();
+              if (playerRole.equals("OPERATIONS_EXPERT") && buildResearchStation()) {
+                  return true;
+              }
+              else {
+                System.out.println("They need to go to a researh station.");
+                tryDriveResearchStation();
+                return true;
+              }
+              
           }
       }
       else{
