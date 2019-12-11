@@ -1,14 +1,20 @@
 package Pandemic.player;
+import java.util.ArrayList;
 import java.util.Random;
 
 import Pandemic.Gameboard.GameBoard;
-import Pandemic.Gameboard.SimulatePandemic;
+import Pandemic.actions.Action;
+import Pandemic.actions.buildResearchStation;
+import Pandemic.actions.charterFlight;
+import Pandemic.actions.directFlight;
+import Pandemic.actions.discoverCure;
+import Pandemic.actions.driveCity;
+import Pandemic.actions.shuttleFlight;
+import Pandemic.actions.treatDisease;
 import Pandemic.cities.City;
 import Pandemic.variables.Disease;
 import Pandemic.variables.Piece;
 import Pandemic.variables.Variables;
-import Pandemic.actions.*;
-import java.util.ArrayList;
 
 
 public class Player{
@@ -24,6 +30,14 @@ public class Player{
   String[] possibleColour = {"Red","Blue","Yellow","Black"};
   ArrayList<Action> suggestions = new ArrayList<Action>();
   
+  //------------for storing
+  private ArrayList<City>   freezeCities = new ArrayList<City>();
+	private  int f_redCube,f_blueCubes,f_yellowCubes,f_blackCubes;
+	private  ArrayList<Disease> f_diseases = new ArrayList<Disease>();
+	private  ArrayList<City>   f_ResearchStation = new ArrayList<City>();
+	private  City f1_location,f2_location,f3_location,f4_location;
+	//--------------to return
+
   /*
    * Constructor for objects of class Player
    */
@@ -448,6 +462,35 @@ public class Player{
         }
 
         return 100.f*discountFactor;
+  }
+
+  private void freeze() {	    
+   	freezeCities  = (ArrayList<City>) pandemicBoard.getCities().clone();
+	  f_redCube         = pandemicBoard.redCubes;
+	  f_blueCubes       = pandemicBoard.blueCubes;
+	  f_yellowCubes     = pandemicBoard.yellowCubes;
+	  f_blackCubes      = pandemicBoard.blackCubes;
+	  f_diseases        = (ArrayList<Disease>) pandemicBoard.getDiseases().clone();
+	  f_ResearchStation = (ArrayList<City>) pandemicBoard.getResearchCentre().clone();
+	  f1_location		= pandemicBoard.playerPieces[0].getLocation();
+	  f2_location		= pandemicBoard.playerPieces[1].getLocation();
+	  f3_location   	= pandemicBoard.playerPieces[2].getLocation();
+	  f4_location   	= pandemicBoard.playerPieces[3].getLocation();
+   
+   }
+   
+  private void unfreeze() {	    
+	  pandemicBoard.cities      = freezeCities;
+		pandemicBoard.redCubes    = f_redCube;
+		pandemicBoard.blueCubes   = f_blueCubes;  
+		pandemicBoard.yellowCubes = f_yellowCubes;
+		pandemicBoard.blackCubes  = f_blackCubes;
+		pandemicBoard.diseases	= f_diseases;		  
+		pandemicBoard.playerPieces[0].setLocation(f1_location);
+		pandemicBoard.playerPieces[1].setLocation(f2_location);
+		pandemicBoard.playerPieces[2].setLocation(f3_location);
+		pandemicBoard.playerPieces[3].setLocation(f4_location);
+		Variables.CITY_WITH_RESEARCH_STATION = f_ResearchStation;
   }
 
 //Player will either treat disease or go to a city with 3 cubes.
