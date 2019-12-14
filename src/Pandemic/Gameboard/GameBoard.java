@@ -590,6 +590,10 @@ public class GameBoard {
 	      
     public void printStats() {
     	System.out.println("Cubes: red: "+redCubes+" blue: "+blueCubes+" black: "+blackCubes+" yellow: "+yellowCubes);
+    	ArrayList<City> cities1=get1CubeCities();
+    	ArrayList<City> cities2=get2CubeCities();
+    	ArrayList<City> cities3=get3CubeCities();
+    	System.out.println("3 cube cities: "+cities3.size()+"\n2 cube cities: "+cities2.size()+"\n1 cube cities: "+cities1.size());
     }
     
     

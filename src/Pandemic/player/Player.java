@@ -607,7 +607,6 @@ public class Player{
   
   public void printStats() {
 	  System.out.println("Diseases cured: "+diseasesCured);
-	  System.out.println();
   }
 
 //Player will either treat disease or go to a city with 3 cubes.

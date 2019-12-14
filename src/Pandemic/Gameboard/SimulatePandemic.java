@@ -241,7 +241,9 @@ public class SimulatePandemic
             System.out.println(" game over, too many outbreaks! ");
             gameLost = true;
             gameOver = true; 
-            looserPrint();            
+            looserPrint(); 
+            gamePlayers[0].printStats();
+            gameBoard.printStats();
         }
         else if (gameBoard.emptyDeck())
         {
@@ -249,9 +251,9 @@ public class SimulatePandemic
             gameLost = true;
             gameOver = true;
             looserPrint();
+            gamePlayers[0].printStats();
+            gameBoard.printStats();
         } 
-        gamePlayers[0].printStats();
-        gameBoard.printStats();
         //the condition of not have any other cubes to set 
         //is implemented in @GameBoard.checkCubesRemain and @NoMoreCubes
     }
