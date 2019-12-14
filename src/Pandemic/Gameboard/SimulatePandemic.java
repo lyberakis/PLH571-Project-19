@@ -243,6 +243,10 @@ public class SimulatePandemic
             gameOver = true; 
             looserPrint(); 
             gamePlayers[0].printStats();
+            for(int i=0;i<4;i++) {
+            	System.out.print(gamePlayers[i].getPlayerRole()+"'s ");
+            	gamePlayers[i].printPlayerStats();
+            }
             gameBoard.printStats();
         }
         else if (gameBoard.emptyDeck())
@@ -252,6 +256,10 @@ public class SimulatePandemic
             gameOver = true;
             looserPrint();
             gamePlayers[0].printStats();
+            for(int i=0;i<4;i++) {
+            	System.out.print(gamePlayers[i].getPlayerRole()+"'s ");
+            	gamePlayers[i].printPlayerStats();
+            }
             gameBoard.printStats();
         } 
         //the condition of not have any other cubes to set 

@@ -594,6 +594,12 @@ public class GameBoard {
     	ArrayList<City> cities2=get2CubeCities();
     	ArrayList<City> cities3=get3CubeCities();
     	System.out.println("3 cube cities: "+cities3.size()+"\n2 cube cities: "+cities2.size()+"\n1 cube cities: "+cities1.size());
+    	System.out.println("Outbreaks: "+getOutbreakCount());
+    	ArrayList<City> researchStations=getResearchCentre();
+    	System.out.println("Research Stations: "+researchStations.size());
+    	for (int i=0; i<researchStations.size(); i++)
+    		System.out.println("--"+researchStations.get(i));
+    	
     }
     
     

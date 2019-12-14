@@ -608,6 +608,10 @@ public class Player{
   public void printStats() {
 	  System.out.println("Diseases cured: "+diseasesCured);
   }
+  
+  public void printPlayerStats() {
+	  System.out.println("hand cards:"+hand.size());
+  }
 
 //Player will either treat disease or go to a city with 3 cubes.
   public void rollDice()
@@ -714,10 +718,17 @@ public class Player{
   {
       for (int i = 0; i < pandemicBoard.getNumberColours(); i ++)
       {
-          if (getCountXCards(possibleColour[i]) >= pandemicBoard.getNeededForCure())
-          {
-              return possibleColour[i];
-          }           
+    	  if (playerRole.equals("SCIENTIST")) {
+    		  if (getCountXCards(possibleColour[i]) >= pandemicBoard.getNeededForCure()-1)
+	          {
+	              return possibleColour[i];
+	          }
+    	  }else {
+    		  if (getCountXCards(possibleColour[i]) >= pandemicBoard.getNeededForCure())
+	          {
+	              return possibleColour[i];
+	          }
+    	  }
       }
       return null;
   }
