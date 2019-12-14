@@ -588,7 +588,9 @@ public class GameBoard {
     	//else {return false;}
     }
 	      
-    
+    public void printStats() {
+    	System.out.println("Cubes: red: "+redCubes+" blue: "+blueCubes+" black: "+blackCubes+" yellow: "+yellowCubes);
+    }
     
     
 }

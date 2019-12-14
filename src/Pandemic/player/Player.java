@@ -22,6 +22,7 @@ public class Player{
 
   String playerName;
   int tactic;
+  int diseasesCured=0; //statistics of the game variables
   String playerRole;
   GameBoard pandemicBoard;
   Piece playerPiece;
@@ -603,6 +604,11 @@ public class Player{
 		pandemicBoard.playerPieces[3].setLocation(f4_location);
 		Variables.CITY_WITH_RESEARCH_STATION = f_ResearchStation;
   }
+  
+  public void printStats() {
+	  System.out.println("Diseases cured: "+diseasesCured);
+	  System.out.println();
+  }
 
 //Player will either treat disease or go to a city with 3 cubes.
   public void rollDice()
@@ -650,6 +656,7 @@ public class Player{
               System.out.println("Yeah!!");
               System.out.println("  Yeah!!");
               System.out.println("    Yeah!!");    
+              diseasesCured++;
               return true;
           }
           else{
