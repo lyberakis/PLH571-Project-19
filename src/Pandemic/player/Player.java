@@ -30,7 +30,6 @@ public class Player implements Cloneable {
     ArrayList<City> hand; // hand_cards maybe from action
     String[] possibleColour = { "Red", "Blue", "Yellow", "Black" };
     ArrayList<Action> suggestions = new ArrayList<Action>();
-    int diseasesCured = 0; // statistics of the game variables
 
     // ------------for storing
     private ArrayList<City> freezeCities = new ArrayList<City>();
@@ -594,6 +593,12 @@ public class Player implements Cloneable {
     }
 
     public void printStats() {
+        int diseasesCured = 0;
+        for (Disease disease : pandemicBoard.getDiseases()) {
+            if (disease.cured) {
+                diseasesCured++;
+            }
+        }
         System.out.println("Diseases cured: " + diseasesCured);
     }
 
