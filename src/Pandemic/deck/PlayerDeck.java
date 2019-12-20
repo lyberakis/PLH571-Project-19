@@ -1,11 +1,13 @@
 package Pandemic.deck;
 
 import java.util.ArrayList;
+
+import Pandemic.cities.City;
 //import Pandemic.cities.*;
 import Pandemic.variables.Variables;
 
 
-public class PlayerDeck {
+public class PlayerDeck implements Cloneable{
 
 	private ArrayList<Object> PlayerPile = new ArrayList<>();
 	private ArrayList<Object> PlayerDiscardPile = new ArrayList<>();
@@ -28,8 +30,7 @@ public class PlayerDeck {
 		PlayerPile.add( Variables.paris);
 		PlayerPile.add( Variables.essen);
 		PlayerPile.add( Variables.milan);
-		PlayerPile.add( Variables.stpeterburg);
-		PlayerPile.add( isEpidemic);
+		PlayerPile.add( Variables.stpeterburg);		
 		PlayerPile.add( Variables.losangeles);
 		PlayerPile.add( Variables.mexicocity);
 		PlayerPile.add( Variables.miami);
@@ -39,7 +40,7 @@ public class PlayerDeck {
 		PlayerPile.add( Variables.buenosaires);
 		PlayerPile.add( Variables.saopaulo);
 		PlayerPile.add( Variables.lagos);
-		PlayerPile.add( isEpidemic);
+		PlayerPile.add( Variables.isEpidemic);
 		PlayerPile.add( Variables.kinshasa);
 		PlayerPile.add( Variables.johannesburg);
 		PlayerPile.add( Variables.khartoum);
@@ -48,12 +49,13 @@ public class PlayerDeck {
 		PlayerPile.add( Variables.cairo);
 		PlayerPile.add( Variables.moscow);
 		PlayerPile.add( Variables.baghdad);
+		PlayerPile.add( Variables.isEpidemic);
 		PlayerPile.add( Variables.tehran);
 		PlayerPile.add( Variables.riyadh);
 		PlayerPile.add( Variables.karachi);
 		PlayerPile.add( Variables.mumbai);
 		PlayerPile.add( Variables.delhi);
-		PlayerPile.add( isEpidemic);
+		PlayerPile.add( Variables.isEpidemic);
 		PlayerPile.add( Variables.chennai);
 		PlayerPile.add( Variables.kolkata);
 		PlayerPile.add( Variables.bangkok);
@@ -65,7 +67,7 @@ public class PlayerDeck {
 		PlayerPile.add( Variables.seoul);
 		PlayerPile.add( Variables.tokyo);
 		PlayerPile.add( Variables.osaka);
-		PlayerPile.add( isEpidemic);
+		PlayerPile.add( Variables.isEpidemic);
 		PlayerPile.add( Variables.taipei);
 		PlayerPile.add( Variables.manila);
 		PlayerPile.add( Variables.sydney);		
@@ -81,6 +83,13 @@ public class PlayerDeck {
 
 	public void setPlayerDiscardPile(ArrayList<Object> playerDiscardPile) {
 		PlayerDiscardPile = playerDiscardPile;
+	}
+	
+	public Object clone() throws CloneNotSupportedException {
+		PlayerDeck Pl_deck = (PlayerDeck) super.clone();
+		Pl_deck.PlayerDiscardPile = (ArrayList<Object>) Pl_deck.getPlayerDiscardPile();
+		Pl_deck.PlayerPile		  = (ArrayList<Object>) Pl_deck.getPlayerPile();
+		return Pl_deck;
 	}
 	
 }

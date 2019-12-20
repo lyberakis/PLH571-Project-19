@@ -13,7 +13,7 @@ import Pandemic.variables.Variables;
  * This is a attempt to construct a naive Pandemic Board game edition.*
  ***/
 
-public class GameBoard {
+public class GameBoard implements Cloneable{
 	
     
     // A city used for unused research centers
@@ -72,7 +72,7 @@ public class GameBoard {
     public int blackCubes = 24;
     
     // An arraylist containing all the research centers
-    //public ResearchCentre[] researchCentres;
+    public ArrayList<City> researchCentres;
     
     // An arraylist containing all the diseases used in the game.
     public ArrayList<Disease> diseases = new ArrayList<Disease>();
@@ -119,17 +119,19 @@ public class GameBoard {
     	}  	    	
     }
     
-    public ArrayList<City> getResearchCentre(){return Variables.GET_CITIES_WITH_RESEARCH_STATION();}
+    
+    
     
     public int getNumberColours(){ return 4; }
     
     public int getNeededForCure() { return neededForCure;}
     
     // returns all the cities with 3 cubes
-    public ArrayList<City> get3CubeCities()
+    @SuppressWarnings("unchecked")
+	public ArrayList<City> get3CubeCities()
     {
     	//ArrayList<City> toReturn = new ArrayList<City>();
-		ArrayList<City> toReturn = (ArrayList<City>) cities.clone();
+		ArrayList<City> toReturn = ((ArrayList<City>) cities.clone());
         for (int i = 0 ; i < cities.size() ; i ++)
         {
             if (cities.get(i).getMaxCube() !=3)
@@ -144,7 +146,8 @@ public class GameBoard {
     }
 
     // returns all the cities with 2 cubes
-    public ArrayList<City> get2CubeCities()
+    @SuppressWarnings("unchecked")
+	public ArrayList<City> get2CubeCities()
     {
     	//ArrayList<City> toReturn = new ArrayList<City>();
 		ArrayList<City> toReturn = (ArrayList<City>) cities.clone();
@@ -163,7 +166,8 @@ public class GameBoard {
     }
     
     // returns all the cities with 1 cubes
-    public ArrayList<City> get1CubeCities()
+    @SuppressWarnings("unchecked")
+	public ArrayList<City> get1CubeCities()
     {
     	//ArrayList<City> toReturn = new ArrayList<City>();
 		ArrayList<City> toReturn = (ArrayList<City>) cities.clone();
@@ -231,7 +235,6 @@ public class GameBoard {
     public void initialInfect()
     {
         Collections.shuffle(infectPile);
-        Collections.shuffle(cities);
         int x;
         for (int i = 0 ; i< Variables.NUM_INITIALLY_INFECTED; i++)
         {
@@ -306,7 +309,6 @@ public class GameBoard {
     
     
     // This method will infect a given number of cities based on the given infection rate.
-    @SuppressWarnings("unchecked")
 	public void infectCityPhase(int infectionRate)
     {
         int i,z;        
@@ -314,18 +316,22 @@ public class GameBoard {
         for (z=0;z<playerPieces.length;z++)//for finding pieces of QUARANTINE_SPECIALIST
         {
         	if (playerPieces[z].owner.getPlayerRole().equals("QUARANTINE_SPECIALIST")) 
-        		break;
-        	
+        		break;        	
         }
         i = 0;
         while (i< infectionRate) {
             i = i + 1;
-            City cityToInfect = infectPile.get(0);         
+            City cityToInfect = infectPile.get(0);  
             checkCities = (ArrayList<City>) playerPieces[z].getLocationConnections().clone();           
             //check all connected city for QUARANTINE_SPECIALIST
-            if (!checkCities.contains(cityToInfect)) {
+            if (checkCities.contains(cityToInfect)) {
+            	infectDiscardPile.add(cityToInfect);
+   	     	 	infectPile.remove(0);             	
+            }
+            else
+            {
             	System.out.println("INFECTING " + cityToInfect.getName() + " with 1 " + cityToInfect.getColour() + " cubes.");
-            	infectCity(cityToInfect);
+            	infectCity(cityToInfect);  
             }
         }
         checkCities.clear();        
@@ -345,8 +351,35 @@ public class GameBoard {
 	         if (cities.get(x).addCube(infectCity.getColour()))
 	         {
 	             System.out.println("OUTBREAK");
+	             addCube(infectCity.getColour());
 	             incrementOutbreak();
+	             //infected the neighbors cities
+	             int k;
+	             for (k=0;k<playerPieces.length;k++)//for finding pieces of QUARANTINE_SPECIALIST
+	             {
+	             	if (playerPieces[k].owner.getPlayerRole().equals("QUARANTINE_SPECIALIST")) 
+	             		break;	             	
+	             }
+	             checkCities = (ArrayList<City>) playerPieces[k].getLocationConnections().clone();
+	             int e;
+	             for ( e=0;e<infectCity.getNeighbors().size();e++)
+		         {
+	            	 int q;
+	            	 for ( q=0;q<cities.size();q++) {	            		 
+	        			 if (cities.get(q).getName().equals(infectCity.getNeighbors().get(e).getName()) && (!checkCities.contains(infectCity.getNeighbors().get(e)))) {
+	        				//System.out.println("I have found " + infectCity.getName() + " and it is at position " + x + " within the cities array");
+	        				 if (cities.get(q).addCube(infectCity.getColour())) {
+	        					 System.out.println("OUTBREAK");
+	        					 addCube(infectCity.getColour());
+	        					 incrementOutbreak();
+	        				 }
+	        				 removeCube(infectCity.getColour());
+	        				 break;
+	         			}
+	        		 }
+		         }
 	         }
+	         
 	         //removes a cube of the appropriate colour from the game boards pool.
 	         removeCube(infectCity.getColour());
 	         // System.out.println("Just removed a " + infectCity.getColour() + " from the pool");
@@ -360,7 +393,7 @@ public class GameBoard {
     {
         for (int i = 0 ; i < cities.size() ; i ++)
         {
-            cities.get(i).setDistance(9999999);
+            cities.get(i).setDistance(9999);
         }
     }
 	
@@ -483,16 +516,44 @@ public class GameBoard {
 			if (cities.get(x).getName().equals(toInfect.getName())) {
 				break;
 			}
-		}
+		}      
 		//infect with 3 cubes
-        cities.get(x).addCube(toInfect.getColour());
-		cities.get(x).addCube(toInfect.getColour());   
-		cities.get(x).addCube(toInfect.getColour());   
-        
-        //descrease the available cubes of this colour
-  	    removeCube(toInfect.getColour());
-  	    removeCube(toInfect.getColour());
-  	    removeCube(toInfect.getColour());
+        int i;
+        for (i=0;i<3;i++) {
+        	if ((cities.get(x).addCube(toInfect.getColour()))){
+        		System.out.println("OUTBREAK");
+        		addCube(toInfect.getColour());
+        		incrementOutbreak();
+        		//infected the neighbors cities
+        		int k;
+	            for (k=0;k<playerPieces.length;k++)//for finding pieces of QUARANTINE_SPECIALIST
+	            {
+	            	if (playerPieces[k].owner.getPlayerRole().equals("QUARANTINE_SPECIALIST")) 
+	            		break;	             	
+	            }
+	            checkCities = (ArrayList<City>) playerPieces[k].getLocationConnections().clone();
+        		int e;
+  	            for (e=0;e<toInfect.getNeighbors().size();e++)
+		         {
+	            	 for (int z=0;z<cities.size();z++) {	            		 
+	        			 if (cities.get(z).getName().equals(toInfect.getNeighbors().get(e).getName()) && (!checkCities.contains(toInfect.getNeighbors().get(e)))) {
+	        				//System.out.println("I have found " + infectCity.getName() + " and it is at position " + x + " within the cities array");
+	        				 if (cities.get(z).addCube(toInfect.getColour())) {
+	        					 System.out.println("OUTBREAK");
+	        					 addCube(toInfect.getColour());
+	        					 incrementOutbreak();
+	        				 }
+	        				 removeCube(toInfect.getColour());
+	        				 break;
+	         			}
+	        		 }
+		         }
+  	            break;
+        	}
+        	//descrease the available cubes of this colour
+        	removeCube(toInfect.getColour());
+        	
+        }
   	    
   	    infectDiscardPile.add(toInfect);
   	    infectPile.remove(toInfect);
@@ -507,8 +568,7 @@ public class GameBoard {
     public void intensifyEpidemic()
     {
         Collections.shuffle(infectDiscardPile);
-        //infectPile.addAll(0, infectDiscardPile);
-        infectPile.addAll(infectDiscardPile);
+        infectPile.addAll(0, infectDiscardPile);
         infectDiscardPile.clear();//empty
     }
     
@@ -519,8 +579,7 @@ public class GameBoard {
         // draws the bottom card of the infection deck, and places 3 cubes on it
         infectEpidemic();        
         // shuffles the infection discard pile onto the top of the infection deck
-        intensifyEpidemic();
-        
+        intensifyEpidemic();        
     }
     
     /**
@@ -528,12 +587,10 @@ public class GameBoard {
      */
     public void setDiseases()
     {
-        //for(int i=0;i<4;i++) {
-        	diseases.add(new Disease("Red"));
-        	diseases.add(new Disease("Black"));
-        	diseases.add(new Disease("Yellow"));
-        	diseases.add(new Disease("Blue"));
-        //}
+       	diseases.add(new Disease("Red"));
+       	diseases.add(new Disease("Black"));
+       	diseases.add(new Disease("Yellow"));
+       	diseases.add(new Disease("Blue"));
     }
     
     public ArrayList<Disease> getDiseases() {
@@ -602,5 +659,157 @@ public class GameBoard {
     	
     }
     
-    
+	public void setPlayerPieces(Piece[] playerPieces) {		this.playerPieces = playerPieces;
+	}
+	public void setPlayerDeck(PlayerDeck playerDeck) {		this.playerDeck = playerDeck;
+	}
+	public void setInfectDeck(InfectDeck infectDeck) {		this.infectDeck = infectDeck;
+	}
+	public void setCitiesMap(InfectDeck citiesMap) {		CitiesMap = citiesMap;
+	}
+	public void setPlayerPile(ArrayList<Object> playerPile) {		this.playerPile = playerPile;
+	}
+	public void setPlayerDiscardPile(ArrayList<Object> playerDiscardPile) {		this.playerDiscardPile = playerDiscardPile;
+	}
+	public void setInfectPile(ArrayList<City> infectPile) {		this.infectPile = infectPile;
+	}
+	public void setInfectDiscardPile(ArrayList<City> infectDiscardPile) {		this.infectDiscardPile = infectDiscardPile;
+	}
+	public void setInfectDiscardPileBeforeEpidemic(ArrayList<City> infectDiscardPileBeforeEpidemic) {
+		this.infectDiscardPileBeforeEpidemic = infectDiscardPileBeforeEpidemic;
+	}
+	public void setCheckCities(ArrayList<City> checkCities) {		this.checkCities = checkCities;
+	}
+	public void setResearchCentres(ArrayList<City> researchCentres) {	this.researchCentres = Variables.CITY_WITH_RESEARCH_STATION;
+	}
+	public void setDiseases(ArrayList<Disease> diseases) {		this.diseases = diseases;
+	}
+	public Piece[] getPlayerPieces() {		return playerPieces;
+	}
+	public PlayerDeck getPlayerDeck() {		return playerDeck;
+	}
+	public InfectDeck getInfectDeck() {		return infectDeck;
+	}
+	public InfectDeck getCitiesMap() {		return CitiesMap;
+	}
+	public ArrayList<Object> getPlayerPile() {		return playerPile;
+	}
+	public ArrayList<Object> getPlayerDiscardPile() {		return playerDiscardPile;
+	}
+	public ArrayList<City> getInfectPile() {		return infectPile;
+	}
+	public ArrayList<City> getInfectDiscardPile() {		return infectDiscardPile;
+	}
+	public ArrayList<City> getInfectDiscardPileBeforeEpidemic() {		return infectDiscardPileBeforeEpidemic;
+	}
+	public ArrayList<City> getCheckCities() {		return checkCities;
+	}    
+	public ArrayList<City> getResearchCentres() { 		return Variables.GET_CITIES_WITH_RESEARCH_STATION();
+	}
+	    
+	 
+	protected Object clone() throws CloneNotSupportedException {
+    	GameBoard cloned = (GameBoard) super.clone();
+    	Piece[] pieces = (Piece[]) this.getPlayerPieces();
+    	Piece[] clonedpieces = new Piece[pieces.length];
+    	
+    	for (int i=0;i<pieces.length;i++){
+    		clonedpieces[i] = (Piece) pieces[i].clone(cloned);
+    	}
+    	cloned.playerPieces    = clonedpieces;
+    	
+    	
+    	cloned.playerDeck      = (PlayerDeck) this.getPlayerDeck();		//shallow copy, does not change
+    	cloned.infectDeck      = (InfectDeck)  this.getInfectDeck();	//shallow copy, -//-
+    	cloned.CitiesMap       = (InfectDeck)    this.getCitiesMap();	//shallow copy, -//-
+    	
+    	
+    	ArrayList<Object> playerpile = this.getPlayerPile();
+    	ArrayList<Object> clonedplayerpile = new ArrayList<Object>();
+    	
+    	for (int i=0;i<playerpile.size();i++) {
+    		if (playerpile.get(i) instanceof City) {
+    			clonedplayerpile.add( ((City) playerpile.get(i)).clone());
+    		}
+    		else if(playerpile.get(i) instanceof Boolean) {
+    			clonedplayerpile.add( ((boolean) playerpile.get(i)));
+    		}
+    		else {
+    			throw new CloneNotSupportedException("Player pile contains objects that are neither City nor boolean!");
+    		}
+    		
+    	}
+    	
+    	cloned.playerPile = clonedplayerpile;
+    	
+    	//cloned.playerDiscardPile = (ArrayList<Object>)  this.getPlayerDiscardPile().clone();
+    	ArrayList<Object> playerdispile = this.getPlayerDiscardPile();
+    	ArrayList<Object> clonedplayerdispile = new ArrayList<Object>();
+    	
+    	for (int i=0;i<playerdispile.size();i++) {
+    		if (playerdispile.get(i) instanceof City) {
+    			clonedplayerdispile.add( ((City) playerdispile.get(i)).clone());
+    		}
+    		else if(playerpile.get(i) instanceof Boolean) {
+    			clonedplayerdispile.add( ((boolean) playerdispile.get(i)));
+    		}
+    		else {
+    			throw new CloneNotSupportedException("Player discard pile contains objects that are neither City nor boolean!");
+    		}
+    		
+    	}
+    	cloned.playerDiscardPile = clonedplayerdispile; 	
+    	
+    	//cloned.infectPile      = (ArrayList<City>)  this.getInfectPile().clone();
+    	ArrayList<City> infectedpile = this.getInfectPile();
+    	ArrayList<City> clonedinfectedpile = new ArrayList<City>();
+    	
+    	for (int i=0;i<infectedpile.size();i++) {    		
+    		clonedinfectedpile.add( (City) infectedpile.get(i).clone());
+    	}
+    	cloned.infectPile = clonedinfectedpile;
+    	
+    	//cloned.infectDiscardPile = (ArrayList<City>)  this.getInfectDiscardPile().clone();
+    	ArrayList<City> infecteddispile = this.getInfectDiscardPile();
+    	ArrayList<City> clonedinfecteddispile = new ArrayList<City>();
+    	
+    	for (int i=0;i<infecteddispile.size();i++) {    		
+    		clonedinfecteddispile.add( (City) infecteddispile.get(i).clone());
+    	}
+    	cloned.infectDiscardPile = clonedinfecteddispile;    	
+    	
+    	//cloned.infectDiscardPileBeforeEpidemic = (ArrayList<City>)  this.getInfectDiscardPileBeforeEpidemic().clone();
+    	ArrayList<City> infecteddisbeforepile = this.getInfectDiscardPile();
+    	ArrayList<City> clonedinfecteddisbeforepile = new ArrayList<City>();
+    	
+    	for (int i=0;i<infecteddisbeforepile.size();i++) {    		
+    		clonedinfecteddisbeforepile.add( (City) infecteddisbeforepile.get(i).clone());
+    	}
+    	cloned.infectDiscardPileBeforeEpidemic = clonedinfecteddisbeforepile;    	
+    	
+    	cloned.checkCities     = (ArrayList<City>)  this.checkCities;	//shallow copy
+    	
+    	//cloned.researchCentres = (ArrayList<City>) this.getResearchCentres().clone();
+    	ArrayList<City> researchCentres = this.getResearchCentres();
+    	ArrayList<City> clonedresearchCentres = new ArrayList<City>();
+    	
+    	for (int i=0;i<researchCentres.size();i++) {    		
+    		clonedresearchCentres.add( (City) researchCentres.get(i).clone());
+    	}
+    	cloned.researchCentres = clonedresearchCentres;   //REMINDER, City shallow clones for neighbors, deep clones for self
+    	
+    	//cloned.diseases        = (ArrayList<Disease>)  this.getDiseases().clone();
+    	ArrayList<Disease> diseases = this.getDiseases();
+    	ArrayList<Disease> cloneddiseases = new ArrayList<Disease>();
+    	
+    	for (int i=0;i<diseases.size();i++) {    		
+    		cloneddiseases.add( (Disease) diseases.get(i).clone());
+    	}
+    	cloned.diseases = cloneddiseases;   //REMINDER, City shallow clones for neighbors, deep clones for self
+    	    	  	
+    	return cloned;
+    }
+	
+	
+	
 }
