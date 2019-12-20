@@ -5,6 +5,7 @@ import java.util.Collections;
 import Pandemic.cities.City;
 import Pandemic.deck.InfectDeck;
 import Pandemic.deck.PlayerDeck;
+import Pandemic.player.Player;
 import Pandemic.variables.Disease;
 import Pandemic.variables.Piece;
 import Pandemic.variables.Variables;
@@ -14,8 +15,11 @@ import Pandemic.variables.Variables;
  ***/
 
 public class GameBoard implements Cloneable{
-	
-    
+	Player jesus= new Player("Jack the Ripper","SCIENTIST");
+	  Player unabomber= new Player("Unabomber","QUARANTINE_SPECIALIST");
+	  Player jack= new Player("Jesus","OPERATIONS_EXPERT");
+	  Player deadpool= new Player ("Zodiac Killer","MEDIC");
+	  
     // A city used for unused research centers
     //public City unplaced = new City();
 
@@ -473,7 +477,16 @@ public class GameBoard implements Cloneable{
 		SimulatePandemic.gameLost = true;
 		SimulatePandemic.gameOver = true; 
 		SimulatePandemic.looserPrint();    
-    	
+		jesus.printStats();
+        System.out.print(jesus.getPlayerRole()+"'s ");
+        jesus.printPlayerStats();
+        System.out.print(unabomber.getPlayerRole()+"'s ");
+        unabomber.printPlayerStats();
+        System.out.print(jack.getPlayerRole()+"'s ");
+        jack.printPlayerStats();
+        System.out.print(deadpool.getPlayerRole()+"'s ");
+        deadpool.printPlayerStats();
+        printStats();
     }
     	
     // moves the infection rate marker by 1.
@@ -645,19 +658,7 @@ public class GameBoard implements Cloneable{
     	//else {return false;}
     }
 	      
-    public void printStats() {
-    	System.out.println("Cubes: red: "+redCubes+" blue: "+blueCubes+" black: "+blackCubes+" yellow: "+yellowCubes);
-    	ArrayList<City> cities1=get1CubeCities();
-    	ArrayList<City> cities2=get2CubeCities();
-    	ArrayList<City> cities3=get3CubeCities();
-    	System.out.println("3 cube cities: "+cities3.size()+"\n2 cube cities: "+cities2.size()+"\n1 cube cities: "+cities1.size());
-    	System.out.println("Outbreaks: "+getOutbreakCount());
-    	ArrayList<City> researchStations=getResearchCentre();
-    	System.out.println("Research Stations: "+researchStations.size());
-    	for (int i=0; i<researchStations.size(); i++)
-    		System.out.println("--"+researchStations.get(i));
-    	
-    }
+    
     
 	public void setPlayerPieces(Piece[] playerPieces) {		this.playerPieces = playerPieces;
 	}
@@ -810,6 +811,18 @@ public class GameBoard implements Cloneable{
     	return cloned;
     }
 	
-	
+	public void printStats() {
+    	System.out.println("Cubes: red: "+redCubes+" blue: "+blueCubes+" black: "+blackCubes+" yellow: "+yellowCubes);
+    	ArrayList<City> cities1=get1CubeCities();
+    	ArrayList<City> cities2=get2CubeCities();
+    	ArrayList<City> cities3=get3CubeCities();
+    	System.out.println("3 cube cities: "+cities3.size()+"\n2 cube cities: "+cities2.size()+"\n1 cube cities: "+cities1.size());
+    	System.out.println("Outbreaks: "+getOutbreakCount());
+    	ArrayList<City> researchStations=getResearchCentres();
+    	System.out.println("Research Stations: "+researchStations.size());
+    	for (int i=0; i<researchStations.size(); i++)
+    		System.out.println("--"+researchStations.get(i));
+    	
+    }
 	
 }
