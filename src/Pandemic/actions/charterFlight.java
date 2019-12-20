@@ -7,11 +7,13 @@ public class charterFlight extends Action{
 	
 	private City moveFrom;
 	private ArrayList<City> hand_cards;
+	private City moveTo;
 
-	public charterFlight( City moveFrom, ArrayList<City> hand_cards) {
+	public charterFlight( City moveFrom, ArrayList<City> hand_cards,City moveTo) {
 		
 		this.moveFrom = moveFrom;
 		this.hand_cards = hand_cards;
+		this.moveTo = moveTo;
 	}
 	
 	
@@ -19,6 +21,10 @@ public class charterFlight extends Action{
 	public void setMoveFrom(City moveFrom) {this.moveFrom = moveFrom;	}
 	public ArrayList<City> getHand_cards() {return hand_cards;	}
 	public void setHand_cards(ArrayList<City> hand_cards) {	this.hand_cards = hand_cards;}
+	public City getMoveTo() { return moveTo;}
+	public void setMoveTo(City moveTo) { this.moveTo = moveTo;	}
+	
+	
 	
 	public boolean isaLegalMove() {
 		this.setHand_cards(hand_cards);
@@ -29,6 +35,8 @@ public class charterFlight extends Action{
 		}
 		return false;
 	}
+
+
 	
 	
 	

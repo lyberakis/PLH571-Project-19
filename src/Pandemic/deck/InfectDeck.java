@@ -5,7 +5,7 @@ import Pandemic.cities.*;
 import Pandemic.variables.Variables;
 
 
-public class InfectDeck {
+public class InfectDeck implements Cloneable{
 
 	private ArrayList<City> InfectPile = new ArrayList<City>();
 	private ArrayList<City> InfectDiscardPile = new ArrayList<City>();
@@ -66,22 +66,21 @@ public class InfectDeck {
 
 	//getters and setters
 	public ArrayList<City> getInfectPile() {return InfectPile;	}
-
 	public void setInfectPile(ArrayList<City> infectPile) {InfectPile = infectPile;}
-
 	public ArrayList<City> getInfectDiscardPile() {	return InfectDiscardPile;}
-
-	public void setInfectDiscardPile(ArrayList<City> infectDiscardPile) {
-		InfectDiscardPile = infectDiscardPile;
+	public void setInfectDiscardPile(ArrayList<City> infectDiscardPile) {		InfectDiscardPile = infectDiscardPile;
 	}
-
-	public ArrayList<City> getInfectDiscardPileBeforeEpidemic() {
-		return InfectDiscardPileBeforeEpidemic;
+	public ArrayList<City> getInfectDiscardPileBeforeEpidemic() {	return InfectDiscardPileBeforeEpidemic;
 	}
-
 	public void setInfectDiscardPileBeforeEpidemic(ArrayList<City> infectDiscardPileBeforeEpidemic) {
 		InfectDiscardPileBeforeEpidemic = infectDiscardPileBeforeEpidemic;
 	}
 
-	
+	public Object clone() throws CloneNotSupportedException {
+	    InfectDeck Inf_deck = (InfectDeck) super.clone();
+	    Inf_deck.InfectDiscardPile				 = (ArrayList<City>) Inf_deck.getInfectDiscardPile();
+	    Inf_deck.InfectDiscardPileBeforeEpidemic = (ArrayList<City>) Inf_deck.getInfectDiscardPileBeforeEpidemic();
+	    Inf_deck.InfectPile		   				 = (ArrayList<City>) Inf_deck.getInfectPile();
+		return Inf_deck;
+	}
 }

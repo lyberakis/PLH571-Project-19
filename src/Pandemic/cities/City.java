@@ -4,6 +4,12 @@ import java.math.*;
 import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.List;
+
+import Pandemic.Gameboard.GameBoard;
+import Pandemic.actions.Action;
+import Pandemic.player.Player;
+import Pandemic.variables.Piece;
+
 import java.util.Collections;
 
 
@@ -14,7 +20,7 @@ import java.util.Collections;
 * world map.
 */
 
-public  class City{
+public  class City implements Cloneable{
 
   protected String name;
   protected int infectionLevel ;
@@ -75,19 +81,19 @@ public  class City{
   public void removeCube(String cubeColour){
         if (cubeColour.equals("Red") && redCubes > 0)
         {
-            redCubes = redCubes - 1;
+            redCubes --;
         }
         else if (cubeColour.equals("Blue") && blueCubes > 0)
         {
-            blueCubes = blueCubes - 1;
+            blueCubes --;
         }        
         else if (cubeColour.equals("Yellow") && yellowCubes > 0)
         {
-            yellowCubes = yellowCubes - 1;
+            yellowCubes --;
         }   
         else if (cubeColour.equals("Black") && blackCubes > 0)
         {
-            blackCubes = blackCubes - 1;
+            blackCubes --;
         }   
   }
   
@@ -162,5 +168,45 @@ public  class City{
         return 0;
   }
 
+	public Object clone(/*GameBoard gb, Piece pc*/) throws CloneNotSupportedException {
+		City cloned = (City) super.clone();
+		cloned.name = String.valueOf(this.name);
+		cloned.neighbors = this.neighbors; //shallow copy, possible error when outbreak happens
+		cloned.colour = String.valueOf(this.colour);
+		
+	
+	
+		return cloned;
+	}
+	public int getRedCubes() {
+		return redCubes;
+	}
+	public void setRedCubes(int redCubes) {
+		this.redCubes = redCubes;
+	}
+	public int getBlueCubes() {
+		return blueCubes;
+	}
+	public void setBlueCubes(int blueCubes) {
+		this.blueCubes = blueCubes;
+	}
+	public int getBlackCubes() {
+		return blackCubes;
+	}
+	public void setBlackCubes(int blackCubes) {
+		this.blackCubes = blackCubes;
+	}
+	public int getYellowCubes() {
+		return yellowCubes;
+	}
+	public void setYellowCubes(int yellowCubes) {
+		this.yellowCubes = yellowCubes;
+	}
+	public boolean isHasOutbreak() {
+		return hasOutbreak;
+	}
+	public void setHasOutbreak(boolean hasOutbreak) {
+		this.hasOutbreak = hasOutbreak;
+	}
 	
 }

@@ -1,5 +1,6 @@
 package Pandemic.player;
 import java.util.Random;
+import java.util.Scanner;
 
 import Pandemic.Gameboard.GameBoard;
 import Pandemic.Gameboard.SimulatePandemic;
@@ -11,7 +12,7 @@ import Pandemic.actions.*;
 import java.util.ArrayList;
 
 
-public class Player{
+public class Player implements Cloneable{
 
   String playerName;
   int tactic;
@@ -162,7 +163,7 @@ public class Player{
   //Build research station
   public boolean buildResearchStation ()
   {
-	  
+	 if (playerAction>0) { 
 	  buildResearchStation tmp = new buildResearchStation(playerPiece.getLocation(),getHand());
 	  if (playerRole.equals("OPERATIONS_EXPERT") && !Variables.CITY_WITH_RESEARCH_STATION.contains(playerPiece.getLocation())) 
 	  {
@@ -184,21 +185,24 @@ public class Player{
 	          return true;
 	      }
 	  }
+	 }
+	 
       return false;
   }
   
 //Treat disease action
  public boolean treatDisease (City location, String colour)
  {
+	if (playerAction>0) {  
 	 treatDisease tmp = new treatDisease(location,colour);
 	 if (playerRole.equals("MEDIC")) {
 	     if(tmp.isaLegalMove()==true && location == playerPiece.getLocation())
 	     {
 	    	 System.out.println("Removing all " + colour + " cube from " + location.getName());
-	    	 for (int i=0;i<location.getCubeColour(colour);i++) {
+	    	 while(location.getCubeColour(colour)!=0) {
 	        	 location.removeCube(colour);
 	             pandemicBoard.addCube(colour);//add in pool of cube             
-	         }
+	        }
 	         decreasePlayerAction();
 	         suggestions.add(tmp);
 	         return true;
@@ -215,6 +219,7 @@ public class Player{
 	         return true;
 	     }
 	 }
+	}
      return false;
  }
   
@@ -223,6 +228,7 @@ public class Player{
   // Drive action
   public boolean driveCity (City location, City destination)
   {
+	if (playerAction>0) { 
 	  System.out.println(getPlayerName() + " current location is in " + location);
 	  System.out.println("and he wants to go in " + destination);
 	  // System.out.println(location.getMaxCube());
@@ -234,23 +240,25 @@ public class Player{
           System.out.println(getPlayerName() + " drives from " + location.getName() + " to " + destination.getName() + ".");
           playerPiece.setLocation(destination);
           decreasePlayerAction();
-          suggestions.add(tmp);
+          suggestions.add( (driveCity) tmp);
           return true;
       }
       else 
       {
           System.out.println("the location isn't connected");
       }
+	}
       return false;
   }
   
   // Charter Flight action
   public boolean charterFlight(City location, City destination)
   {
+	if (playerAction>0) { 
 	  // System.out.println(getPlayerName() + " wants to flying from " + 
 	  // location.getName() + " to "+ destination.getName() + 
 	  // " on a charter flight");
-	  charterFlight tmp = new charterFlight(location,getHand());
+	  charterFlight tmp = new charterFlight(location,getHand(),destination);
       if (tmp.isaLegalMove() && playerPiece.getLocation().equals(location))
       {
           System.out.println(getPlayerName() + " takes a charter flight to " + 
@@ -261,12 +269,14 @@ public class Player{
           suggestions.add(tmp);
           return true;
       }
+	}
       return false;
   }
   
   //Direct flight
   public boolean directFlight(City location, City destination)
   {
+	 if (playerAction>0) { 
 	// System.out.println(getPlayerName() + " wants to flying from " + 
 	// location.getName() + " to "+ destination.getName() + 
 	// " on a direct flight");
@@ -281,12 +291,14 @@ public class Player{
 		  suggestions.add(tmp);
           return true;
 	  }
+	 }
 	  return false;
   }
   
   //ShuttleFlight
   public boolean shuttleFlight(City location, City destination)
   {
+	 if (playerAction>0) { 
 	// System.out.println(getPlayerName() + " wants to flying from " + 
 	// location.getName() + " to "+ destination.getName() + 
 	// " on a shuttle flight");
@@ -300,12 +312,14 @@ public class Player{
 		 suggestions.add(tmp);
          return true;
 	 }
+	}
 	 return false;
   }
   
   // Discover Cure action
   public boolean discoverCure(City location, String colour)
   { 
+	if (playerAction>0) { 
 	 discoverCure tmp = new discoverCure(location,getHand(),colour);
 	 if (playerRole.equals("SCIENTIST")) {
 	    if (tmp.isaLegalMove(1))
@@ -330,6 +344,7 @@ public class Player{
 	       return true;
 		}
 	 }
+	}
 	 return false;
   }
   
@@ -349,19 +364,23 @@ public class Player{
   //---------------------------------------------------------------------------------
   
   
-  public void makeDecision(ArrayList<City>  friend_hand,String Role)
+  public void makeDecision(ArrayList<City>  friend_hand,String Role, City friend_location)
   {
-	 // driveCity(playerPiece.getLocation(),playerPiece.getLocation().getNeighbors().get(0)); 
-	  //take Variables.Suggestions and build model for others player
+	 //take Variables.Suggestions and build model for others player
       System.out.print(this.getPlayerName() + " is thinking..... ");
       boolean checkCure = checkCureWorthIt();
+      
       if (checkCure)
       {
           System.out.println("might be worth trying to find a cure.");
           checkTryCure();
+          
       }
+     
       if (!checkCure && (getDistanceResearch() > 3) && (tactic > 0) )
       {
+    	  
+    	  
           tactic--;
           System.out.print("They are far enough from a research station to consider building one.");
           if (!buildResearchStation())
@@ -372,13 +391,13 @@ public class Player{
       }
       else if (!checkCure)
       {
+    	  
     	  rollDice();
     	  rollDice();
     	  rollDice();
     	  rollDice();
           tactic--;
       }
-      
       if (tactic < -500 )
       {
           System.out.println("out of ideas, will drive randomly");
@@ -394,16 +413,18 @@ public class Player{
   {
       System.out.print("Wants to treat disease... ");
       if (!tryTreat(3)) {
-         if (!go3CubeCities()) {
-             tryTreat(2);
-             if (!go2CubeCities()) {
-                 tryTreat(1);
-                 if (!go1CubeCities()) {
-                     System.out.println("Going to drive randomly as can't think of anything.");
-                     driveRandom();
-                 }
-             }
-         }
+    	  if (!go3CubeCities()) {
+    		  if(!tryTreat(2))	 	 {
+    			  if (!go2CubeCities()) 	{
+    				  if(!tryTreat(1)) 			{
+    					  if (!go1CubeCities()) 	{
+    						  System.out.println("Going to drive randomly as can't think of anything.");
+    						  driveRandom();
+    					  }
+    				  }
+    			  }
+    		  }
+    	  }
       }                
   }
 
@@ -496,8 +517,17 @@ public class Player{
   
   //get distance 
   public int getDistanceResearch()
-  {
-      getDistances(Variables.GET_CITIES_WITH_RESEARCH_STATION());
+  {		
+	  ArrayList<City> destinations = new ArrayList<City>();
+	  for (City c : pandemicBoard.cities) {
+		  for (City dest: Variables.GET_CITIES_WITH_RESEARCH_STATION()) {
+			  if (c.getName().equals(dest.getName())) {
+				  destinations.add(c);
+			  }
+		  }
+	  }
+	  
+      getDistances(destinations);
       return playerPiece.getLocation().getDistance();
   }
   
@@ -513,16 +543,18 @@ public class Player{
             break;
           }
       }
-      while (pandemicBoard.cities.get(loc).getDistance() == 9999999){
-          // System.out.println("Looking for places distance of " + distance);
+      while (pandemicBoard.cities.get(loc).getDistance() == 9999){
+          //System.out.println("Looking for places distance of " + distance);
           for (int i = 0 ; i < pandemicBoard.cities.size() ; i ++){
-        	  for (int x = 0 ; x < pandemicBoard.cities.get(i).getNeighbors().size() ; x ++){
+        	  for (int x = 0 ; x < pandemicBoard.cities.get(i).getNeighbors().size() ; x ++){        		  
+        		  //System.out.println(pandemicBoard.cities.get(i).getNeighbors().get(x).getDistance());
                   if ( pandemicBoard.cities.get(i).getDistance() == (distance-1) && pandemicBoard.cities.get(i).getNeighbors().get(x).getDistance() > distance ){
                       pandemicBoard.cities.get(i).getNeighbors().get(x).setDistance(distance);
                   }
               }
           }
           distance ++;
+          
       }
   }
   
@@ -551,10 +583,10 @@ public class Player{
   
   public City calculateDestination()
   {
-      int closestDestination = 9999999;
+      int closestDestination = 9999;
       City toReturn = new City(0,0,0,0,0);
       for (int i = 0 ; i < playerPiece.getLocation().getNeighbors().size(); i++)
-      {
+      {	
           if (playerPiece.getLocation().getNeighbors().get(i).getDistance() < closestDestination)
           {
               //System.out.println("Will probably go to " + playerPiece.getLocationConnections()[i].getName());
@@ -645,6 +677,19 @@ public class Player{
       }
   }
 
-  
+	public Object clone(GameBoard gb, Piece pc) throws CloneNotSupportedException {
+		Player cloned = (Player) super.clone();
+		cloned.playerName = String.valueOf(this.playerName);
+		cloned.playerRole = String.valueOf(this.playerRole);
+		cloned.pandemicBoard = gb;
+		cloned.playerPiece = pc;
+		ArrayList<City> clonedhands = new ArrayList<City>();
+		for (int i=0;i<this.hand.size();i++) {
+			clonedhands.add((City)this.hand.get(i).clone());
+		}
+		cloned.hand = clonedhands;
+		cloned.suggestions = this.suggestions; //shallow copy
+		return cloned;
+	}
   
 }

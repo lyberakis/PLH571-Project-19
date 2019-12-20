@@ -1,19 +1,22 @@
 package Pandemic.Gameboard;
 
 import java.util.Random;
+import java.util.Scanner;
+
 import Pandemic.player.Player;
 import Pandemic.variables.Disease;
 import Pandemic.variables.Piece;
 import Pandemic.variables.Variables;
 import Pandemic.Gameboard.*;
 import Pandemic.actions.Action;
+import Pandemic.actions.driveCity;
 import Pandemic.cities.City;
 
 import java.util.ArrayList;
 
 public class SimulatePandemic
 {
-    public static void main(String[] args)
+    public static void main(String[] args) throws CloneNotSupportedException 
 	{
 	  System.out.println("starting new game");
 	  SimulatePandemic testgame;
@@ -42,26 +45,30 @@ public class SimulatePandemic
     }
     
     //------------for storing
-    private ArrayList<City>   freezeCities = new ArrayList<City>();
-	private  int f_redCube,f_blueCubes,f_yellowCubes,f_blackCubes;
-	private  ArrayList<Disease> f_diseases = new ArrayList<Disease>();
+    private  int f_redCube,f_blueCubes,f_yellowCubes,f_blackCubes;
 	private  ArrayList<City>   f_ResearchStation = new ArrayList<City>();
+    private boolean cured[] 	= new boolean [4];
+    private boolean eliminated[]  = new boolean [4];
 	private  City f1_location,f2_location,f3_location,f4_location;
+    private int cubes[][]  = new int[48][4];
+    private boolean outs[] = new boolean[48];
+    private int dist[]      = new int [48];
+    private int infect[]    = new int [48];
 	//--------------to return
 	
-	
+	private driveCity test = new driveCity();
     // The Game Board contains all the objects of the game.
     public GameBoard gameBoard;
     
     // An array of the players who are playing
     public Player[] gamePlayers;
+	protected GameBoard cloned;
     
     // boolean attributes which indicate if the game is won or lost.
     public static boolean gameOver;
     public static boolean gameWon;
     public static boolean gameLost;
     
-    //public static ArrayList<Action>[] Suggestions = new ArrayList[4];
     
     /**
      * adjustable features of the game that is set up, including
@@ -99,7 +106,7 @@ public class SimulatePandemic
         gamePlayers = currentGamePlayers;
         
         // sets the players to the gameboard
-        sitPlayersDown();
+        sitPlayersDown(gameBoard);
         gameBoard.startGame();
         startingHandSize = calcHandSize();
         drawHands(startingHandSize);
@@ -107,8 +114,7 @@ public class SimulatePandemic
         gameOver = false;        
     }
     
-   @SuppressWarnings("Unchecked")
-	public void playGame()
+   public void playGame() throws CloneNotSupportedException
     {
         int i,z;
         int turns = 0;
@@ -121,9 +127,11 @@ public class SimulatePandemic
             	 * Below we freeze the game to allow other players 
             	 * play our turn to suggest a set of actions.
             	 */
+				
             	i = i -1;     	
             	for (z=0;z<gamePlayers.length;z++) {
-            		freeze();
+            		cloned=freeze();            		
+            		//System.out.println("Before suggestion, Clone Equals GameBoard?:"+(cloned.equals(gameBoard)));
             		if(i!=z) {
             			/*
             			 * Each player has access to the entire gameBoard , his hands
@@ -134,14 +142,21 @@ public class SimulatePandemic
             			System.out.println("sug:"+ (z+1) +" " +gamePlayers[z].getPlayerName() + " make suggestion for "+ gamePlayers[i].getPlayerName());
             			System.out.println("------------------------------------");
             			while (gamePlayers[z].getPlayerAction()>0 && !gameOver){
-            				gamePlayers[z].makeDecision(gamePlayers[i].getHand(),gamePlayers[i].getPlayerRole());
+            				gamePlayers[z].makeDecision(gamePlayers[i].getHand(),gamePlayers[i].getPlayerRole(),gamePlayers[i].getPlayerPiece().location);
                 			Variables.Suggestions[z]=gamePlayers[z].getSuggestions();
                 			checkGameOver();
-            			}
-            			
+            			}            			
             		}
-            		unfreeze();
+            		 System.out.println(this.gameBoard.playerPieces[0].getLocation()+" "+this.gameBoard.playerPieces[1].getLocation()+" "+
+            	        	   this.gameBoard.playerPieces[2].getLocation()+" "+ this.gameBoard.playerPieces[3].getLocation());
+            		unfreeze(cloned);
+            		
+            		sitPlayersDown(gameBoard);
+            		for (Action c : gamePlayers[z].getSuggestions()) {
+            			System.out.println(c);
+            		}
             	} 
+								
             	System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~");
     			System.out.println("Time to take the final actions: " + gamePlayers[i].getPlayerName()+ " investigate the comrades suggestions");
     			System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~");
@@ -153,11 +168,10 @@ public class SimulatePandemic
                 	 * Here  you choose between 2 options
                 	 * 1) modify the dummy AI methods 
                 	 * 2) Create smart enough new methods to win the game
-                	 */
-                	
-                    gamePlayers[i].makeDecision(null,gamePlayers[i].getPlayerRole());
+                	 */                	
+                    gamePlayers[i].makeDecision(null,gamePlayers[i].getPlayerRole(),gamePlayers[i].getPlayerPiece().location);
                     checkGameOver();
-               }
+               }               
                 resetAllPlayerAction();
                 Variables.Suggestions[i]=gamePlayers[i].getSuggestions();
                 //empty all the suggestions array
@@ -174,7 +188,7 @@ public class SimulatePandemic
                }
                checkGameOver();
             }
-            
+            //resetAllPlayerAction();
             turns++;
             if (!checkGameOver())
             {	
@@ -188,50 +202,89 @@ public class SimulatePandemic
     
    
    
-   private void freeze() {	    
-   	  freezeCities  = (ArrayList<City>) gameBoard.getCities().clone();
-	  f_redCube         = gameBoard.redCubes;
-	  f_blueCubes       = gameBoard.blueCubes;
-	  f_yellowCubes     = gameBoard.yellowCubes;
-	  f_blackCubes      = gameBoard.blackCubes;
-	  f_diseases        = (ArrayList<Disease>) gameBoard.getDiseases().clone();
-	  f_ResearchStation = (ArrayList<City>) gameBoard.getResearchCentre().clone();
-	  f1_location		= gameBoard.playerPieces[0].getLocation();
-	  f2_location		= gameBoard.playerPieces[1].getLocation();
-	  f3_location   	= gameBoard.playerPieces[2].getLocation();
-	  f4_location   	= gameBoard.playerPieces[3].getLocation();
-   
+   private GameBoard freeze() throws CloneNotSupportedException  {	    
+	   for (int k=0; k<gameBoard.cities.size();k++ ) {
+		   this.cubes[k][0] = gameBoard.cities.get(k).getRedCubes();
+		   this.cubes[k][1] = gameBoard.cities.get(k).getBlueCubes();
+		   this.cubes[k][2] = gameBoard.cities.get(k).getBlackCubes();
+		   this.cubes[k][3] = gameBoard.cities.get(k).getYellowCubes();
+		   this.infect[k]   = gameBoard.cities.get(k).getInfectionLevel();
+		   this.dist[k]		= gameBoard.cities.get(k).getDistance();
+		   this.outs[k]		= gameBoard.cities.get(k).isHasOutbreak();	   
+	   }
+	   for (int k=0; k<gameBoard.diseases.size();k++ ) {
+		   this.cured[k]= gameBoard.diseases.get(k).cured;
+		   this.eliminated[k]= gameBoard.diseases.get(k).eliminated;
+		   
+	   }
+	   
+	   f_redCube         = this.gameBoard.redCubes;
+	   f_blueCubes       = this.gameBoard.blueCubes;
+	   f_yellowCubes     = this.gameBoard.yellowCubes;
+	   f_blackCubes      = this.gameBoard.blackCubes;
+
+	   //f_ResearchStation = (ArrayList<City>) this.gameBoard.getResearchCentres();
+	   f_ResearchStation = new ArrayList<City>();
+	   for (int k=0;k<gameBoard.getResearchCentres().size();k++) {
+		   f_ResearchStation.add(gameBoard.getResearchCentres().get(k));
+	   }
+	   f1_location		= this.gameBoard.playerPieces[0].getLocation();
+	   f2_location		= this.gameBoard.playerPieces[1].getLocation();
+	   f3_location   	= this.gameBoard.playerPieces[2].getLocation();
+	   f4_location   	= this.gameBoard.playerPieces[3].getLocation();
+	   GameBoard cloned = (GameBoard) gameBoard.clone();
+	   return cloned;
    }
    
-   private void unfreeze() {	    
-	   	  gameBoard.cities      = freezeCities;
-		  gameBoard.redCubes    = f_redCube;
-		  gameBoard.blueCubes   = f_blueCubes;  
-		  gameBoard.yellowCubes = f_yellowCubes;
-		  gameBoard.blackCubes  = f_blackCubes;
-		  gameBoard.diseases	= f_diseases;		  
-		  gameBoard.playerPieces[0].setLocation(f1_location);
-		  gameBoard.playerPieces[1].setLocation(f2_location);
-		  gameBoard.playerPieces[2].setLocation(f3_location);
-		  gameBoard.playerPieces[3].setLocation(f4_location);
-		  Variables.CITY_WITH_RESEARCH_STATION = f_ResearchStation;
+   private void unfreeze(GameBoard cloned) throws CloneNotSupportedException{
+	   this.gameBoard = cloned;
+	   for (int k=0; k<gameBoard.cities.size();k++ ) {
+		   gameBoard.cities.get(k).setRedCubes(this.cubes[k][0]);
+		   gameBoard.cities.get(k).setBlueCubes(this.cubes[k][1]);
+		   gameBoard.cities.get(k).setBlackCubes(this.cubes[k][2]);
+		   gameBoard.cities.get(k).setYellowCubes(this.cubes[k][3]);
+		   gameBoard.cities.get(k).setInfectionLevel(this.infect[k]);
+		   gameBoard.cities.get(k).setDistance(this.dist[k]);
+		   gameBoard.cities.get(k).setHasOutbreak(this.outs[k]);	   
+	   }
+	   
+	   this.gameBoard.redCubes    = f_redCube;
+	   this.gameBoard.blueCubes   = f_blueCubes;  
+	   this.gameBoard.yellowCubes = f_yellowCubes;
+	   this.gameBoard.blackCubes  = f_blackCubes;
+		
+	   for (int k=0; k<gameBoard.diseases.size();k++ ) {
+		   gameBoard.diseases.get(k).setCured((this.cured[k]));
+		   gameBoard.diseases.get(k).setEliminated(((this.eliminated[k])));
+		   
+	   }
+	   Variables.CITY_WITH_RESEARCH_STATION = new ArrayList<City>();
+	   for (int k=0;k<gameBoard.getResearchCentres().size();k++) {
+		   Variables.CITY_WITH_RESEARCH_STATION.add(f_ResearchStation.get(k));
+	   }
+	   
+	   this.gameBoard.playerPieces[0].setLocation(f1_location);
+	   this.gameBoard.playerPieces[1].setLocation(f2_location);
+	   this.gameBoard.playerPieces[2].setLocation(f3_location);
+	   this.gameBoard.playerPieces[3].setLocation(f4_location);
+	   Variables.CITY_WITH_RESEARCH_STATION = f_ResearchStation;
+	   //
 	   
 	   }
    
-    public boolean checkGameOver()
-    {
-        if (checkGameWon())
-        {
-            for (int i = 0 ; i < 5 ; i++)
-            {
-                System.out.println(" YOU WIN!!! ");
-            }
-
+   public boolean checkGameOver()
+   {
+       if (checkGameWon())
+       {
+           for (int i = 0 ; i < 5 ; i++)
+           {
+               System.out.println(" YOU WIN!!! ");
+           }
             gameOver = true;
-        }
-        checkGameLost();
-        return gameOver;
-    }
+       }
+       checkGameLost();
+       return gameOver;
+   }
     
     // checks if the game is lost
     public void checkGameLost()
@@ -292,7 +345,7 @@ public class SimulatePandemic
             // placing pieces
             // System.out.println("Placing a piece for " + gamePlayers[i-1].getPlayerName());
         	
-            gameBoard.playerPieces[i] = new Piece(gamePlayers[i], gameBoard, temp3);
+            gameBoard.playerPieces[i] = new Piece(gamePlayers[i]/*, gameBoard*/, temp3);
             // System.out.println("making sure they know the piece is their piece!");
             gamePlayers[i].setPlayerPiece(gameBoard.playerPieces[i]);            
         }
@@ -333,14 +386,14 @@ public class SimulatePandemic
     }
         
 
-    public void sitPlayersDown()
+    public void sitPlayersDown(GameBoard gb)
     {
         int i = gamePlayers.length;
         while (i > 0)
         {
         	i = i -1;
-            System.out.println(gamePlayers[i].getPlayerName() + " has joined the game");
-            gamePlayers[i].setGameBoard(gameBoard);           
+            //System.out.println(gamePlayers[i].getPlayerName() + " has joined the game");
+            gamePlayers[i].setGameBoard(gb);           
         }
     }
 
