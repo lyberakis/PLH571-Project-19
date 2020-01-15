@@ -49,7 +49,10 @@ public class SimulatePandemic
 	private  ArrayList<City>   f_ResearchStation = new ArrayList<City>();
     private boolean cured[] 	= new boolean [4];
     private boolean eliminated[]  = new boolean [4];
-	private  City f1_location,f2_location,f3_location,f4_location;
+	private  City f1_location;
+	private  City f2_location;
+	private  City f3_location;
+	private  City f4_location;
     private int cubes[][]  = new int[48][4];
     private boolean outs[] = new boolean[48];
     private int dist[]      = new int [48];
@@ -141,14 +144,13 @@ public class SimulatePandemic
             			System.out.println("------------------------------------");
             			System.out.println("sug:"+ (z+1) +" " +gamePlayers[z].getPlayerName() + " make suggestion for "+ gamePlayers[i].getPlayerName());
             			System.out.println("------------------------------------");
+            			
             			while (gamePlayers[z].getPlayerAction()>0 && !gameOver){
             				gamePlayers[z].makeDecision(gamePlayers[i].getHand(),gamePlayers[i].getPlayerRole(),gamePlayers[i].getPlayerPiece().location);
                 			Variables.Suggestions[z]=gamePlayers[z].getSuggestions();
                 			checkGameOver();
             			}            			
             		}
-            		 System.out.println(this.gameBoard.playerPieces[0].getLocation()+" "+this.gameBoard.playerPieces[1].getLocation()+" "+
-            	        	   this.gameBoard.playerPieces[2].getLocation()+" "+ this.gameBoard.playerPieces[3].getLocation());
             		unfreeze(cloned);
             		
             		sitPlayersDown(gameBoard);
@@ -160,6 +162,7 @@ public class SimulatePandemic
             	System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~");
     			System.out.println("Time to take the final actions: " + gamePlayers[i].getPlayerName()+ " investigate the comrades suggestions");
     			System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+    			
                 while (gamePlayers[i].getPlayerAction() > 0 && !gameOver){
                 
                     //here is where an action should happen
@@ -169,9 +172,15 @@ public class SimulatePandemic
                 	 * 1) modify the dummy AI methods 
                 	 * 2) Create smart enough new methods to win the game
                 	 */                	
-                    gamePlayers[i].makeDecision(null,gamePlayers[i].getPlayerRole(),gamePlayers[i].getPlayerPiece().location);
+                    
+                	gamePlayers[i].makeDecision(null,gamePlayers[i].getPlayerRole(),gamePlayers[i].getPlayerPiece().location);
                     checkGameOver();
-               }               
+                }
+//                System.out.println(gamePlayers[0].getPlayerPiece().location);
+//                System.out.println(gamePlayers[1].getPlayerPiece().location);
+//                System.out.println(gamePlayers[2].getPlayerPiece().location);
+//                System.out.println(gamePlayers[3].getPlayerPiece().location);
+                
                 resetAllPlayerAction();
                 Variables.Suggestions[i]=gamePlayers[i].getSuggestions();
                 //empty all the suggestions array
@@ -182,7 +191,7 @@ public class SimulatePandemic
                 if (!checkGameOver()) 
                 {
                    System.out.println(gamePlayers[i].getPlayerName() + " completed 4 actions");
-                   gamePlayers[i].drawCard(2);                
+                   gamePlayers[i].drawCard(2,false);                
                    gameBoard.infectCityPhase(gameBoard.getInfectionRate());
 
                }
@@ -228,10 +237,10 @@ public class SimulatePandemic
 	   for (int k=0;k<gameBoard.getResearchCentres().size();k++) {
 		   f_ResearchStation.add(gameBoard.getResearchCentres().get(k));
 	   }
-	   f1_location		= this.gameBoard.playerPieces[0].getLocation();
-	   f2_location		= this.gameBoard.playerPieces[1].getLocation();
-	   f3_location   	= this.gameBoard.playerPieces[2].getLocation();
-	   f4_location   	= this.gameBoard.playerPieces[3].getLocation();
+	   f1_location		= gamePlayers[0].getPlayerPiece().location; 
+	   f2_location		= gamePlayers[1].getPlayerPiece().location; 
+	   f3_location   	= gamePlayers[2].getPlayerPiece().location; 
+	   f4_location   	= gamePlayers[3].getPlayerPiece().location; 
 	   GameBoard cloned = (GameBoard) gameBoard.clone();
 	   return cloned;
    }
@@ -263,15 +272,30 @@ public class SimulatePandemic
 		   Variables.CITY_WITH_RESEARCH_STATION.add(f_ResearchStation.get(k));
 	   }
 	   
+	   gamePlayers[0].getPlayerPiece().location=f1_location;
+	   gamePlayers[1].getPlayerPiece().location=f2_location;
+	   gamePlayers[2].getPlayerPiece().location=f3_location;
+	   gamePlayers[3].getPlayerPiece().location=f4_location;
+	   
 	   this.gameBoard.playerPieces[0].setLocation(f1_location);
 	   this.gameBoard.playerPieces[1].setLocation(f2_location);
 	   this.gameBoard.playerPieces[2].setLocation(f3_location);
 	   this.gameBoard.playerPieces[3].setLocation(f4_location);
+	   
 	   Variables.CITY_WITH_RESEARCH_STATION = f_ResearchStation;
 	   //
 	   
 	   }
    
+   public ArrayList<City> returnLocation() {
+	   ArrayList<City>   f_loc = new ArrayList<City>();
+	   f_loc.add(gamePlayers[0].getPlayerPiece().location);
+	   f_loc.add(gamePlayers[1].getPlayerPiece().location);
+	   f_loc.add(gamePlayers[2].getPlayerPiece().location);
+	   f_loc.add(gamePlayers[3].getPlayerPiece().location);
+	   return f_loc;
+	   
+   }
    public boolean checkGameOver()
    {
        if (checkGameWon())
@@ -370,7 +394,7 @@ public class SimulatePandemic
         {
         	i = i -1;
             System.out.println("drawing hand for " + gamePlayers[i].getPlayerName());
-            gamePlayers[i].drawCard(handSize);            
+            gamePlayers[i].drawCard(handSize,true);            
         }
     }
     
