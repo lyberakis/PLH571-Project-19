@@ -1,22 +1,18 @@
 package Pandemic.player;
 
+import java.util.Random;
+import java.util.Scanner;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Random;
-
 import Pandemic.Gameboard.GameBoard;
-import Pandemic.actions.Action;
-import Pandemic.actions.buildResearchStation;
-import Pandemic.actions.charterFlight;
-import Pandemic.actions.directFlight;
-import Pandemic.actions.discoverCure;
-import Pandemic.actions.driveCity;
-import Pandemic.actions.shuttleFlight;
-import Pandemic.actions.treatDisease;
+import Pandemic.Gameboard.SimulatePandemic;
 import Pandemic.cities.City;
 import Pandemic.variables.Disease;
 import Pandemic.variables.Piece;
 import Pandemic.variables.Variables;
+import Pandemic.actions.*;
+import java.util.ArrayList;
+import java.util.Collections;
 
 public class Player implements Cloneable {
 
@@ -70,24 +66,38 @@ public class Player implements Cloneable {
      * draw @param numberOfCards from playerPile and check if it is epidemic and
      * call @resolveEpidemic() or draw to @hand()
      */
-    public void drawCard(int numberOfCards) {
+    public void drawCard(int numberOfCards, boolean test1) {
         // draws a card for the player from the board
         for (int i = 0; i < numberOfCards; i++) {
-            if (pandemicBoard.playerPile.size() != 0) {
-                // first element from array list PlayerPile
-                if (pandemicBoard.playerPile.get(0).equals(Variables.isEpidemic)) {
-                    System.out.println("-----EPIDEMIC DRAWN!-----");
-                    pandemicBoard.resolveEpidemic();// follow the steps for epidemic event
-                    pandemicBoard.playerPile.remove(0);
-                    break;
-                } else {
-                    // adds a new card to the players hand.
-                    hand.add((City) pandemicBoard.playerPile.get(0));
+            if (test1 == true) {
+                // create instance of Random class
+                Random rand = new Random();
+                int rand_int1 = rand.nextInt(pandemicBoard.playerPile.size());
+                while (pandemicBoard.playerPile.get(rand_int1).equals(Variables.isEpidemic)) {
+                    rand_int1 = rand.nextInt(pandemicBoard.playerPile.size());
+                    Collections.shuffle(pandemicBoard.playerPile);
                 }
-                pandemicBoard.playerPile.remove(0);// remove the card from PlayerDeck
+                // adds a new card to the players hand.
+                hand.add((City) pandemicBoard.playerPile.get(rand_int1));
+                pandemicBoard.playerPile.remove(rand_int1);// remove the card from PlayerDeck
                 System.out.println(this.getPlayerName() + " draws a card");
             } else {
-                System.out.println("no more cards left");
+                if (pandemicBoard.playerPile.size() != 0) {
+                    // first element from array list PlayerPile
+                    if (pandemicBoard.playerPile.get(0).equals(Variables.isEpidemic)) {
+                        System.out.println("-----EPIDEMIC DRAWN!-----");
+                        pandemicBoard.resolveEpidemic();// follow the steps for epidemic event
+                        pandemicBoard.playerPile.remove(0);
+                        break;
+                    } else {
+                        // adds a new card to the players hand.
+                        hand.add((City) pandemicBoard.playerPile.get(0));
+                    }
+                    pandemicBoard.playerPile.remove(0);// remove the card from PlayerDeck
+                    System.out.println(this.getPlayerName() + " draws a card");
+                } else {
+                    System.out.println("no more cards left");
+                }
             }
         }
     }
@@ -431,7 +441,7 @@ public class Player implements Cloneable {
         // This is going to be called 4 times
         if (friend_hand == null) { // Our turn
             // freeze();
-            System.out.println("Util: " + evaluate(this.pandemicBoard));
+            // System.out.println("Util: " + evaluate(this.pandemicBoard));
             // decideDoctor();
             if (!checkTryCure()) {
                 switch (Role) {
@@ -659,7 +669,6 @@ public class Player implements Cloneable {
                     tryDriveResearchStation();
                     return true;
                 }
-
             }
         } else {
             System.out.println("no point in trying to find a cure.");
@@ -698,14 +707,8 @@ public class Player implements Cloneable {
      **/
     public String tryCureCardColour() {
         for (int i = 0; i < pandemicBoard.getNumberColours(); i++) {
-            if (playerRole.equals("SCIENTIST")) {
-                if (getCountXCards(possibleColour[i]) >= pandemicBoard.getNeededForCure() - 1) {
-                    return possibleColour[i];
-                }
-            } else {
-                if (getCountXCards(possibleColour[i]) >= pandemicBoard.getNeededForCure()) {
-                    return possibleColour[i];
-                }
+            if (getCountXCards(possibleColour[i]) >= pandemicBoard.getNeededForCure()) {
+                return possibleColour[i];
             }
         }
         return null;
