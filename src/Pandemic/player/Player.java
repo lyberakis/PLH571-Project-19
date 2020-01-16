@@ -26,6 +26,7 @@ public class Player implements Cloneable {
     ArrayList<City> hand; // hand_cards maybe from action
     String[] possibleColour = { "Red", "Blue", "Yellow", "Black" };
     ArrayList<Action> suggestions = new ArrayList<Action>();
+    private OpponetModel[] opponentModel = new OpponetModel[3];
 
     // ------------for storing
     private ArrayList<City> freezeCities = new ArrayList<City>();
@@ -462,7 +463,10 @@ public class Player implements Cloneable {
                     break;
                 }
             }
-
+            
+            //opponentModel[0].makeAction(evaluate(pandemicBoard));
+            
+            
             // hand
             // ArrayList<City> neighbors = playerPiece.getLocationConnections();
 
