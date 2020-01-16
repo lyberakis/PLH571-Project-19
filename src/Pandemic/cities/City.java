@@ -209,4 +209,8 @@ public  class City implements Cloneable{
 		this.hasOutbreak = hasOutbreak;
 	}
 	
+	public String toString() {
+		return name;
+	}
+	
 }
