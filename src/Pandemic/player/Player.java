@@ -520,8 +520,20 @@ public class Player implements Cloneable {
             // tactic--;
 
         } else { // Send a suggestion
-            directFlight tmp = new directFlight(this.playerPiece.location.getNeighbors().get(0), this.getHand());
-            suggestions.add(tmp);
+        	String holdRole = playerRole;
+        	playerRole = Role;
+        	City holdLocation = playerPiece.getLocation();
+        	playerPiece.setLocation(friend_location);
+        	ArrayList<City> holdHand = hand;
+        	hand = friend_hand;
+        	if (checkTryCureForSuggestion()==3) {
+        		directFlight tmp = new directFlight(this.playerPiece.location.getNeighbors().get(0), this.getHand());
+        		System.out.println("---------------------Nothing-----------------------------------");
+        		suggestions.add(tmp);
+        	}
+        	playerRole=holdRole;
+        	playerPiece.setLocation(holdLocation);
+        	hand = holdHand;
             decreasePlayerAction(); // Player has only 4 moves!
         }
     }
@@ -655,6 +667,25 @@ public class Player implements Cloneable {
         }
         return toReturn;
 
+    }
+    
+    public int checkTryCureForSuggestion() {
+        if (checkCureWorthIt()) {
+            if (discoverCure(playerPiece.getLocation(), tryCureCardColour())) {
+            	System.out.println("---------------------We are in 0-----------------------------------");
+                return 0;
+            } else {
+                if (playerRole.equals("OPERATIONS_EXPERT") && buildResearchStation()) {
+                	System.out.println("---------------------We are in 1-----------------------------------");
+                    return 1;
+                } else {
+                    tryDriveResearchStation();
+                    System.out.println("---------------------We are in 2-----------------------------------");
+                    return 2;
+                }
+            }
+        }
+        return 3;
     }
 
     public boolean checkTryCure() {
