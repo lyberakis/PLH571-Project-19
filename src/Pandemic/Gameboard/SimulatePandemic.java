@@ -17,10 +17,15 @@ public class SimulatePandemic {
         Player jack;
         Player deadpool;
 
-        unabomber = new Player("Unabomber", "QUARANTINE_SPECIALIST");
-        jack = new Player("Jesus", "OPERATIONS_EXPERT");
-        jesus = new Player("Jack the Ripper", "SCIENTIST");
-        deadpool = new Player("Zodiac Killer", "MEDIC");
+        unabomber = new Player("QUARANTINE SPECIALIST", "QUARANTINE_SPECIALIST");
+        jack = new Player("OPERATIONS EXPERT", "OPERATIONS_EXPERT");
+        jesus = new Player("SCIENTIST", "SCIENTIST");
+        deadpool = new Player("MEDIC", "MEDIC");
+        
+        //unabomber = new Player("Unabomber", "QUARANTINE_SPECIALIST");
+        //jack = new Player("Jesus", "OPERATIONS_EXPERT");
+        //jesus = new Player("Jack the Ripper", "SCIENTIST");
+        //deadpool = new Player("Zodiac Killer", "MEDIC");
         Player[] currentPlayers;
         currentPlayers = new Player[4];
         currentPlayers[0] = jesus;

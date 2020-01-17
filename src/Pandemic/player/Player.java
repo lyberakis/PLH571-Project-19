@@ -520,13 +520,26 @@ public class Player implements Cloneable {
             // tactic--;
 
         } else { // Send a suggestion
+<<<<<<< HEAD
         	System.out.println("--------------------------Suggestion started--------------------------------");
+=======
+            Piece holdPiece = playerPiece;
+            Piece [] pieces = pandemicBoard.getPlayerPieces();
+            for (int i = 0; i < pieces.length; i++) {
+                if (pieces[i].owner.getPlayerRole().compareTo(Role) == 0) {
+                    playerPiece = pieces[i];
+                    break;
+                }
+            }
+
+>>>>>>> working-branch
         	String holdRole = playerRole;
         	playerRole = Role;
         	City holdLocation = playerPiece.getLocation();
         	playerPiece.setLocation(friend_location);
         	ArrayList<City> holdHand = hand;
         	hand = friend_hand;
+<<<<<<< HEAD
         	if (!checkTryCure()) {
                 switch (Role) {
                 case "MEDIC":
@@ -550,6 +563,18 @@ public class Player implements Cloneable {
         	playerPiece.setLocation(holdLocation);
         	hand = holdHand;
         	System.out.println("--------------------------Suggestion ended--------------------------------");
+=======
+        	if (checkTryCureForSuggestion()==3) {
+        		directFlight tmp = new directFlight(this.playerPiece.location.getNeighbors().get(0), this.getHand());
+        		System.out.println("---------------------Nothing-----------------------------------");
+                suggestions.add(tmp);
+                decreasePlayerAction(); // Player has only 4 moves!
+        	}
+            playerRole = holdRole;
+            playerPiece = holdPiece;
+        	playerPiece.setLocation(holdLocation);
+            hand = holdHand;
+>>>>>>> working-branch
         }
     }
 
