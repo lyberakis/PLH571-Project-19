@@ -520,21 +520,36 @@ public class Player implements Cloneable {
             // tactic--;
 
         } else { // Send a suggestion
+        	System.out.println("--------------------------Suggestion started--------------------------------");
         	String holdRole = playerRole;
         	playerRole = Role;
         	City holdLocation = playerPiece.getLocation();
         	playerPiece.setLocation(friend_location);
         	ArrayList<City> holdHand = hand;
         	hand = friend_hand;
-        	if (checkTryCureForSuggestion()==3) {
-        		directFlight tmp = new directFlight(this.playerPiece.location.getNeighbors().get(0), this.getHand());
-        		System.out.println("---------------------Nothing-----------------------------------");
-        		suggestions.add(tmp);
-        	}
+        	if (!checkTryCure()) {
+                switch (Role) {
+                case "MEDIC":
+                    decideDoctor();
+                    break;
+                case "SCIENTIST":
+                    decideScientist();
+                    break;
+                case "OPERATIONS_EXPERT":
+                    decideOpsExpert();
+                    break;
+                case "QUARANTINE_SPECIALIST":
+                    decideQuarantineSpecialist();
+                    break;
+                default:
+                    decideDoctor();
+                    break;
+                }
+            }
         	playerRole=holdRole;
         	playerPiece.setLocation(holdLocation);
         	hand = holdHand;
-            decreasePlayerAction(); // Player has only 4 moves!
+        	System.out.println("--------------------------Suggestion ended--------------------------------");
         }
     }
 
@@ -669,25 +684,6 @@ public class Player implements Cloneable {
 
     }
     
-    public int checkTryCureForSuggestion() {
-        if (checkCureWorthIt()) {
-            if (discoverCure(playerPiece.getLocation(), tryCureCardColour())) {
-            	System.out.println("---------------------We are in 0-----------------------------------");
-                return 0;
-            } else {
-                if (playerRole.equals("OPERATIONS_EXPERT") && buildResearchStation()) {
-                	System.out.println("---------------------We are in 1-----------------------------------");
-                    return 1;
-                } else {
-                    tryDriveResearchStation();
-                    System.out.println("---------------------We are in 2-----------------------------------");
-                    return 2;
-                }
-            }
-        }
-        return 3;
-    }
-
     public boolean checkTryCure() {
         if (checkCureWorthIt()) {
             if (discoverCure(playerPiece.getLocation(), tryCureCardColour())) {
