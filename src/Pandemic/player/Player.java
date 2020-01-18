@@ -529,34 +529,35 @@ public class Player implements Cloneable {
                     break;
                 }
             }
-
         	String holdRole = playerRole;
         	playerRole = Role;
-        	City holdLocation = playerPiece.getLocation();
-        	playerPiece.setLocation(friend_location);
         	ArrayList<City> holdHand = hand;
         	hand = friend_hand;
-        	if (!checkTryCure()) {
-                switch (Role) {
-                case "MEDIC":
-                    decideDoctor();
-                    break;
-                case "SCIENTIST":
-                    decideScientist();
-                    break;
-                case "OPERATIONS_EXPERT":
-                    decideOpsExpert();
-                    break;
-                case "QUARANTINE_SPECIALIST":
-                    decideQuarantineSpecialist();
-                    break;
-                default:
-                    decideDoctor();
-                    break;
-                }
-            }
+        	int countSuggestions=0;
+        	while (countSuggestions!=4) {
+	        	if (!checkTryCure()) {
+	                switch (Role) {
+	                case "MEDIC":
+	                    decideDoctor();
+	                    break;
+	                case "SCIENTIST":
+	                    decideScientist();
+	                    break;
+	                case "OPERATIONS_EXPERT":
+	                    decideOpsExpert();
+	                    break;
+	                case "QUARANTINE_SPECIALIST":
+	                    decideQuarantineSpecialist();
+	                    break;
+	                default:
+	                    decideDoctor();
+	                    break;
+	                }
+	            }
+	        	countSuggestions++;
+        	}
         	playerRole=holdRole;
-        	playerPiece.setLocation(holdLocation);
+        	playerPiece=holdPiece;
         	hand = holdHand;
         	System.out.println("--------------------------Suggestion ended--------------------------------");
         }
