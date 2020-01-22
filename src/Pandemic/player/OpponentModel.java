@@ -1,12 +1,12 @@
 package Pandemic.player;
 
-public class OpponetModel {
+public class OpponentModel {
 	private int goodActionCounter;
 	private int totalActionCounter;
 	private float prevUtil;
 	
 	
-	public OpponetModel() {
+	public OpponentModel() {
 		totalActionCounter = goodActionCounter = 1;
 		prevUtil = 0;
 	}

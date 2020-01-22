@@ -26,7 +26,7 @@ public class Player implements Cloneable {
     ArrayList<City> hand; // hand_cards maybe from action
     String[] possibleColour = { "Red", "Blue", "Yellow", "Black" };
     ArrayList<Action> suggestions = new ArrayList<Action>();
-    private OpponetModel[] opponentModel = new OpponetModel[4];
+    private OpponentModel[] opponentModel = new OpponentModel[4];
 
     // ------------for storing
     private ArrayList<City> freezeCities = new ArrayList<City>();
