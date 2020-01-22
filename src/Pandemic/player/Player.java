@@ -26,6 +26,7 @@ public class Player implements Cloneable {
     ArrayList<City> hand; // hand_cards maybe from action
     String[] possibleColour = { "Red", "Blue", "Yellow", "Black" };
     ArrayList<Action> suggestions = new ArrayList<Action>();
+    String agentType = "default";
 
     // ------------for storing
     private ArrayList<City> freezeCities = new ArrayList<City>();
@@ -44,6 +45,15 @@ public class Player implements Cloneable {
         playerAction = 4;
         tactic = 50;
         playerRole = pRole;
+    }
+
+    public Player(String pName, String pRole, String agentType) {
+        playerName = pName;
+        hand = new ArrayList<City>();
+        playerAction = 4;
+        tactic = 50;
+        playerRole = pRole;
+        agentType = agentType;
     }
 
     public void setGameBoard(GameBoard currentBoard) {
@@ -434,7 +444,53 @@ public class Player implements Cloneable {
         }
     }
 
-    public void makeDecision(ArrayList<City> friend_hand, String Role, City friend_location) {
+    public void makeDecision(ArrayList<City> friend_hand, String Role, City friend_location) 
+    {
+        switch(agentType) {
+            case "default":
+                this.makeDecisionDefault(friend_hand, Role, friend_location);
+            case "original": 
+                this.makeDecisionOriginal(friend_hand, Role, friend_location);
+        }
+    }
+
+    public void makeDecisionOriginal(ArrayList<City> friend_hand, String Role, City friend_location) 
+    {
+
+        // take Variables.Suggestions and build model for others player
+        System.out.print(this.getPlayerName() + " is thinking..... ");
+        boolean checkCure = checkCureWorthIt();
+
+        if (checkCure) {
+            System.out.println("might be worth trying to find a cure.");
+            checkTryCure();
+
+        }
+
+        if (!checkCure && (getDistanceResearch() > 3) && (tactic > 0)) {
+
+            tactic--;
+            System.out.print("They are far enough from a research station to consider building one.");
+            if (!buildResearchStation()) {
+                System.out.println(" Can't find the required card.");
+                rollDice();
+            }
+        } else if (!checkCure) {
+
+            rollDice();
+            rollDice();
+            rollDice();
+            rollDice();
+            tactic--;
+        }
+        if (tactic < -500) {
+            System.out.println("out of ideas, will drive randomly");
+            driveRandom();
+        }
+        tactic--;
+    }
+
+    public void makeDecisionDefault(ArrayList<City> friend_hand, String Role, City friend_location) {
         // driveCity(playerPiece.getLocation(),playerPiece.getLocation().getNeighbors().get(0));
         // take Variables.Suggestions and build model for others player
 

@@ -46,7 +46,16 @@ public  class City implements Cloneable{
 	  this.blackCubes = blackCubes;
 	  this.infectionLevel = infectionLevel;
   }
-  	
+
+  public void reset ()
+  {
+    this.redCubes = 0;
+    this.yellowCubes = 0;
+    this.blueCubes = 0;
+    this.blackCubes = 0;
+    this.infectionLevel = 0;
+  }
+
   //Gets and sets methods
   public String getName() { return name;}
 

@@ -1,26 +1,35 @@
 package Pandemic.Gameboard;
 
 import java.util.ArrayList;
-
+import java.util.HashMap;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.lang.Math;
 import Pandemic.actions.driveCity;
 import Pandemic.cities.City;
 import Pandemic.player.Player;
+import Pandemic.variables.Disease;
 import Pandemic.variables.Piece;
 import Pandemic.variables.Variables;
 
 public class SimulatePandemic {
     public static void main(String[] args) throws CloneNotSupportedException {
-        System.out.println("starting new game");
+        // System.out.println("starting new game");
         SimulatePandemic testgame;
         Player jesus;
         Player unabomber;
         Player jack;
         Player deadpool;
 
-        unabomber = new Player("Unabomber", "QUARANTINE_SPECIALIST");
-        jack = new Player("Jesus", "OPERATIONS_EXPERT");
-        jesus = new Player("Jack the Ripper", "SCIENTIST");
-        deadpool = new Player("Zodiac Killer", "MEDIC");
+        String agent = "default";
+        if (args.length >= 1) {
+            agent = args[0];
+        }
+
+        unabomber = new Player("Unabomber", "QUARANTINE_SPECIALIST", agent);
+        jack = new Player("Jesus", "OPERATIONS_EXPERT", agent);
+        jesus = new Player("Jack the Ripper", "SCIENTIST", agent);
+        deadpool = new Player("Zodiac Killer", "MEDIC", agent);
         Player[] currentPlayers;
         currentPlayers = new Player[4];
         currentPlayers[0] = jesus;
@@ -31,7 +40,281 @@ public class SimulatePandemic {
         testgame = new SimulatePandemic(currentPlayers);
 
         testgame.playGame();
+
+        int totalDiseasesCured = testgame.totalDiseasesCured;
+        ArrayList<HashMap<String, Integer>> diseasesCured = testgame.diseasesCured;
+        ArrayList<HashMap<String, Integer>> numberOfCards = testgame.numberOfCards;
+        ArrayList<HashMap<String, Integer>> cubesRemain = testgame.cubesRemain;
+        ArrayList<HashMap<String, Integer>> cubesPerCity = testgame.cubesPerCity;
+        ArrayList<HashMap<String, String>> playerLocations = testgame.playerLocations;
+        ArrayList<Integer> outbreaks = testgame.outbreaks;
+        ArrayList<Integer> cardsLeft = testgame.cardsLeft;
+        int totalOutbreaks = testgame.totalOutbreaks;
+        ArrayList<ArrayList<String>> researchStations = testgame.researchStations;
+        int numberOfRounds = testgame.numberOfRounds;
+        boolean gameWon = SimulatePandemic.gameWon;
+        int lossReason = testgame.lossReason;
+
+        if (false) {
+
+            for (int i = 0; i < numberOfRounds; i++) {
+                System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+                System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Round " + (i + 1)
+                        + " ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+                System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+
+                int printCount = 0;
+                int maxLength = 0;
+                for (String player : diseasesCured.get(i).keySet()) {
+                    if (player.length() > maxLength) {
+                        maxLength = player.length();
+                    }
+                }
+                maxLength = (Math.floorDiv(maxLength, 8) + 1) * 8;
+
+                System.out.printf("%47s\n", "Diseases cured:");
+
+                for (String player : diseasesCured.get(i).keySet()) {
+                    System.out.print(player);
+                    for (int j = 0; j < Math.floorDiv(maxLength - player.length(), 8)
+                            + ((((maxLength - player.length()) % 8) != 0) ? 1 : 0); j++) {
+                        System.out.print("\t");
+                    }
+                }
+                System.out.print("\n");
+
+                for (Integer diseases : diseasesCured.get(i).values()) {
+                    System.out.print(diseases);
+                    for (int j = 0; j < Math.floorDiv(maxLength - diseases.toString().length(), 8)
+                            + ((((maxLength - diseases.toString().length()) % 8) != 0) ? 1 : 0); j++) {
+                        System.out.print("\t");
+                    }
+                }
+                System.out.print("\n");
+
+                System.out.printf("%51s\n", "Cards remain in deck: " + cardsLeft.get(i));
+                System.out.printf("%47s\n", "Number of cards:");
+
+                for (String player : numberOfCards.get(i).keySet()) {
+                    System.out.print(player);
+                    for (int j = 0; j < Math.floorDiv(maxLength - player.length(), 8)
+                            + ((((maxLength - player.length()) % 8) != 0) ? 1 : 0); j++) {
+                        System.out.print("\t");
+                    }
+                }
+                System.out.print("\n");
+
+                for (Integer numOfCards : numberOfCards.get(i).values()) {
+                    System.out.print(numOfCards);
+                    for (int j = 0; j < Math.floorDiv(maxLength - numOfCards.toString().length(), 8)
+                            + ((((maxLength - numOfCards.toString().length()) % 8) != 0) ? 1 : 0); j++) {
+                        System.out.print("\t");
+                    }
+                }
+                System.out.print("\n");
+
+                System.out.printf("%47s\n", "Player location:");
+
+                for (String player : playerLocations.get(i).keySet()) {
+                    System.out.print(player);
+                    for (int j = 0; j < Math.floorDiv(maxLength - player.length(), 8)
+                            + ((((maxLength - player.length()) % 8) != 0) ? 1 : 0); j++) {
+                        System.out.print("\t");
+                    }
+                }
+                System.out.print("\n");
+
+                for (String location : playerLocations.get(i).values()) {
+                    System.out.print(location);
+                    for (int j = 0; j < Math.floorDiv(maxLength - location.length(), 8)
+                            + ((((maxLength - location.length()) % 8) != 0) ? 1 : 0); j++) {
+                        System.out.print("\t");
+                    }
+                }
+                System.out.print("\n");
+
+                System.out.printf("%53s\n", "Research station locations:");
+
+                for (String station : researchStations.get(i)) {
+                    System.out.print(station);
+                    for (int j = 0; j < Math.floorDiv(maxLength - station.length(), 8)
+                            + ((((maxLength - station.length()) % 8) != 0) ? 1 : 0); j++) {
+                        System.out.print("\t");
+                    }
+                }
+                System.out.print("\n");
+
+                System.out.printf("%47s\n", "Cubes remaining:");
+
+                for (String color : cubesRemain.get(i).keySet()) {
+                    System.out.print(color);
+                    for (int j = 0; j < Math.floorDiv(maxLength - color.length(), 8)
+                            + ((((maxLength - color.length()) % 8) != 0) ? 1 : 0); j++) {
+                        System.out.print("\t");
+                    }
+                }
+                System.out.print("\n");
+
+                for (Integer num : cubesRemain.get(i).values()) {
+                    System.out.print(num);
+                    for (int j = 0; j < Math.floorDiv(maxLength - num.toString().length(), 8)
+                            + ((((maxLength - num.toString().length()) % 8) != 0) ? 1 : 0); j++) {
+                        System.out.print("\t");
+                    }
+                }
+                System.out.print("\n");
+
+                System.out.printf("%47s\n", "Cubes per city:");
+
+                for (String city : cubesPerCity.get(i).keySet()) {
+                    if (cubesPerCity.get(i).get(city).equals(Integer.valueOf(3))) {
+                        System.out.print(city);
+                        for (int j = 0; j < Math.floorDiv(maxLength - city.length(), 8)
+                                + ((((maxLength - city.length()) % 8) != 0) ? 1 : 0); j++) {
+                            System.out.print("\t");
+                        }
+                        printCount++;
+                        if (printCount >= 6) {
+                            System.out.println("");
+                            for (int j = 0; j < printCount; j++) {
+                                System.out.print(3);
+                                for (int k = 0; k < Math.floorDiv(maxLength - 1, 8)
+                                        + ((((maxLength - 1) % 8) != 0) ? 1 : 0); k++) {
+                                    System.out.print("\t");
+                                }
+                            }
+                            System.out.print("\n");
+                            printCount = 0;
+                        }
+                    }
+                }
+                System.out.print("\n");
+
+                for (int j = 0; j < printCount; j++) {
+                    System.out.print(3);
+                    for (int k = 0; k < Math.floorDiv(maxLength - 1, 8) + ((((maxLength - 1) % 8) != 0) ? 1 : 0); k++) {
+                        System.out.print("\t");
+                    }
+                }
+
+                if (printCount > 0) {
+                    System.out.print("\n");
+                }
+
+                printCount = 0;
+                for (String city : cubesPerCity.get(i).keySet()) {
+                    if (cubesPerCity.get(i).get(city).equals(Integer.valueOf(2))) {
+                        System.out.print(city);
+                        for (int j = 0; j < Math.floorDiv(maxLength - city.length(), 8)
+                                + ((((maxLength - city.length()) % 8) != 0) ? 1 : 0); j++) {
+                            System.out.print("\t");
+                        }
+                        printCount++;
+                        if (printCount >= 6) {
+                            System.out.println("");
+                            for (int j = 0; j < printCount; j++) {
+                                System.out.print(2);
+                                for (int k = 0; k < Math.floorDiv(maxLength - 1, 8)
+                                        + ((((maxLength - 1) % 8) != 0) ? 1 : 0); k++) {
+                                    System.out.print("\t");
+                                }
+                            }
+                            System.out.print("\n");
+                            printCount = 0;
+                        }
+                    }
+                }
+                System.out.print("\n");
+
+                for (int j = 0; j < printCount; j++) {
+                    System.out.print(2);
+                    for (int k = 0; k < Math.floorDiv(maxLength - 1, 8) + ((((maxLength - 1) % 8) != 0) ? 1 : 0); k++) {
+                        System.out.print("\t");
+                    }
+                }
+                if (printCount > 0) {
+                    System.out.print("\n");
+                }
+
+                printCount = 0;
+                for (String city : cubesPerCity.get(i).keySet()) {
+                    if (cubesPerCity.get(i).get(city).equals(Integer.valueOf(1))) {
+                        System.out.print(city);
+                        for (int j = 0; j < Math.floorDiv(maxLength - city.length(), 8)
+                                + ((((maxLength - city.length()) % 8) != 0) ? 1 : 0); j++) {
+                            System.out.print("\t");
+                        }
+                        printCount++;
+                        if (printCount >= 6) {
+                            System.out.println("");
+                            for (int j = 0; j < printCount; j++) {
+                                System.out.print(1);
+                                for (int k = 0; k < Math.floorDiv(maxLength - 1, 8)
+                                        + ((((maxLength - 1) % 8) != 0) ? 1 : 0); k++) {
+                                    System.out.print("\t");
+                                }
+                            }
+                            System.out.print("\n");
+                            printCount = 0;
+                        }
+                    }
+                }
+                System.out.print("\n");
+
+                for (int j = 0; j < printCount; j++) {
+                    System.out.print(1);
+                    for (int k = 0; k < Math.floorDiv(maxLength - 1, 8) + ((((maxLength - 1) % 8) != 0) ? 1 : 0); k++) {
+                        System.out.print("\t");
+                    }
+                }
+                if (printCount > 0) {
+                    System.out.print("\n");
+                }
+
+                System.out.printf("%47s\n", "Outbreaks this round: " + outbreaks.get(i));
+
+            }
+        }
+
+        System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+        System.out.printf("%40s\n", ((gameWon) ? "ITS A WIN!" : "BOO HOO!"));
+        System.out.printf("%35s%35s\n", "Outbreaks this game: " + totalOutbreaks,
+                "Diseases cured this game: " + totalDiseasesCured);
+
+        if (lossReason == 0) {
+            System.out.printf("%60s\n", "Lost because the deck run out of cards.");
+        } else if (lossReason == 1) {
+            System.out.printf("%60s\n", "Lost because there where too many outbreaks.");
+        } else if (lossReason == 2) {
+            System.out.printf("%60s\n", "Lost the game run out off cubes to use.");
+        }
+
+        if (args.length == 2) {
+            try {
+                FileWriter writter = new FileWriter(args[1], true);
+                writter.write(gameWon + "," + lossReason + "\n");
+                writter.close();
+            } catch (IOException e) {
+                System.out.println("SimulatePandemic.main()");
+                return;
+            }
+        }
     }
+
+    // ------------for stats
+    public int totalDiseasesCured = 0;
+    public ArrayList<HashMap<String, Integer>> diseasesCured = new ArrayList<HashMap<String, Integer>>();
+    public ArrayList<HashMap<String, Integer>> numberOfCards = new ArrayList<HashMap<String, Integer>>();
+    public ArrayList<HashMap<String, Integer>> cubesRemain = new ArrayList<HashMap<String, Integer>>();
+    public ArrayList<HashMap<String, Integer>> cubesPerCity = new ArrayList<HashMap<String, Integer>>();
+    public ArrayList<HashMap<String, String>> playerLocations = new ArrayList<HashMap<String, String>>();
+    public ArrayList<Integer> outbreaks = new ArrayList<Integer>();
+    public ArrayList<Integer> cardsLeft = new ArrayList<Integer>();
+    public int totalOutbreaks = 0;
+    public ArrayList<ArrayList<String>> researchStations = new ArrayList<ArrayList<String>>();
+    public int numberOfRounds = 0;
+    public int lossReason = -1;
+    // ---------------------
 
     // ------------for storing
     private int f_redCube, f_blueCubes, f_yellowCubes, f_blackCubes;
@@ -110,7 +393,16 @@ public class SimulatePandemic {
         int turns = 0;
         while (gameOver == false) {
             i = gamePlayers.length;
+            
+            diseasesCured.add(new HashMap<String, Integer>());
+            numberOfCards.add(new HashMap<String, Integer>());
+            cubesPerCity.add(new HashMap<String, Integer>());
+            cubesRemain.add(new HashMap<String, Integer>());
+            playerLocations.add(new HashMap<String, String>());
+            researchStations.add(new ArrayList<String>());
+
             while (i > 0 && !gameOver) {
+
                 /*
                  * Below we freeze the game to allow other players play our turn to suggest a
                  * set of actions.
@@ -184,23 +476,86 @@ public class SimulatePandemic {
 
                 }
                 checkGameOver();
+
+                int curDiseasesCured = 0;
+                for (Disease disease : gameBoard.getDiseases()) {
+                    if (disease.cured) {
+                        curDiseasesCured++;
+                    }
+                }
+                
+                if (curDiseasesCured != totalDiseasesCured) {
+                    diseasesCured.get(turns).put(gamePlayers[i].getPlayerRole().toLowerCase(), Integer.valueOf(curDiseasesCured - totalDiseasesCured));
+                    totalDiseasesCured = curDiseasesCured;
+                }
+                else {
+                    diseasesCured.get(turns).put(gamePlayers[i].getPlayerRole().toLowerCase(), Integer.valueOf(0));
+                }
             }
             // resetAllPlayerAction();
-            turns++;
-            if (!checkGameOver()) {
-                System.out.println("================================================");
-                System.out.println("Ending turn " + turns + " everybody has had a go.");
-                System.out.println("================================================");
+
+            for (int j = 0; j < gamePlayers.length; j++) {
+                numberOfCards.get(turns).put(gamePlayers[j].getPlayerRole().toLowerCase(), Integer.valueOf(gamePlayers[i].getHand().size()));
+                playerLocations.get(turns).put(gamePlayers[j].getPlayerRole().toLowerCase(), gamePlayers[i].getPlayerPiece().getLocation().getName().toLowerCase());
             }
 
+            cubesRemain.get(turns).put("black", Integer.valueOf(gameBoard.blackCubes));
+            cubesRemain.get(turns).put("red", Integer.valueOf(gameBoard.redCubes));
+            cubesRemain.get(turns).put("yellow", Integer.valueOf(gameBoard.yellowCubes));
+            cubesRemain.get(turns).put("blue", Integer.valueOf(gameBoard.blueCubes));
+
+            for (City city : gameBoard.get3CubeCities()) {
+                cubesPerCity.get(turns).put(city.getName().toLowerCase(), Integer.valueOf(city.getMaxCube()));
+            }
+
+            for (City city : gameBoard.get2CubeCities()) {
+                cubesPerCity.get(turns).put(city.getName().toLowerCase(), Integer.valueOf(city.getMaxCube()));
+            }
+
+            for (City city : gameBoard.get1CubeCities()) {
+                cubesPerCity.get(turns).put(city.getName().toLowerCase(), Integer.valueOf(city.getMaxCube()));
+            }
+
+            if (gameBoard.getOutbreakCount() != totalOutbreaks) {
+                outbreaks.add(Integer.valueOf(gameBoard.getOutbreakCount() - totalOutbreaks));
+                totalOutbreaks = gameBoard.getOutbreakCount();
+            }
+            else {
+                outbreaks.add(Integer.valueOf(0));
+            }
+
+            cardsLeft.add(Integer.valueOf(gameBoard.playerPile.size()));
+
+            for(City city : gameBoard.getResearchCentres()) {
+                researchStations.get(turns).add(city.getName().toLowerCase());
+            }
+
+            turns++;
+            if (!checkGameOver()) {
+                // System.out.println("================================================");
+                // System.out.println("Ending turn " + turns + " everybody has had a go.");
+                // System.out.println("================================================");
+            }
         }
         
-        gamePlayers[0].printStats();
-        for (i = 0; i < 4; i++) {
-            System.out.print(gamePlayers[i].getPlayerRole() + "'s ");
-            gamePlayers[i].printPlayerStats();
+        numberOfRounds = turns;
+        for (int j = 0; j < gamePlayers.length; j++) {
+            if (!diseasesCured.get(turns - 1).containsKey(gamePlayers[j].getPlayerRole().toLowerCase())) {
+                diseasesCured.get(turns - 1).put(gamePlayers[j].getPlayerRole().toLowerCase(), Integer.valueOf(0));
+            }
         }
-        gameBoard.printStats();
+
+        if (gameLost && lossReason == -1) {
+            lossReason = 2;
+        }
+
+        // this.stats.
+        // gamePlayers[0].printStats();
+        // for (i = 0; i < 4; i++) {
+        //     System.out.print(gamePlayers[i].getPlayerRole() + "'s ");
+        //     gamePlayers[i].printPlayerStats();
+        // }
+        // gameBoard.printStats();
     }
 
     private GameBoard freeze() throws CloneNotSupportedException {
@@ -304,11 +659,13 @@ public class SimulatePandemic {
     public void checkGameLost() {
         if (gameBoard.getOutbreakCount() > Variables.MAX_NUMBER_OF_OUTBREAK) {
             System.out.println(" game over, too many outbreaks! ");
+            lossReason = 1;
             gameLost = true;
             gameOver = true;
             looserPrint();
         } else if (gameBoard.emptyDeck()) {
             System.out.println(" That's it game over, no more cards. ");
+            lossReason = 0;
             gameLost = true;
             gameOver = true;
             looserPrint();
