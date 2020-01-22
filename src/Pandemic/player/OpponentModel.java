@@ -7,18 +7,18 @@ public class OpponentModel {
 	
 	
 	public OpponentModel() {
-		totalActionCounter = goodActionCounter = 1f;
-		prevUtil = 0;
+		this.totalActionCounter = this.goodActionCounter = 1f;
+		this.prevUtil = 0;
 	}
 	
 	protected float getTrustIndex() {
-		return goodActionCounter/totalActionCounter;
+		return this.goodActionCounter/this.totalActionCounter;
 	}
 	
 	protected void makeAction(float util) {
-		totalActionCounter++;
-		goodActionCounter = (util>0.6*prevUtil)?goodActionCounter+1:goodActionCounter;
-		prevUtil = util;
+		this.totalActionCounter++;
+		this.goodActionCounter = (util>0.6*this.prevUtil)?this.goodActionCounter+1:this.goodActionCounter;
+		this.prevUtil = util;
 	}
 	
 

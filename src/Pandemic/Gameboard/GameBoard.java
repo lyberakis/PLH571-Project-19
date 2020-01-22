@@ -725,7 +725,7 @@ public class GameBoard implements Cloneable {
 		return Variables.GET_CITIES_WITH_RESEARCH_STATION();
 	}
 
-	protected Object clone() throws CloneNotSupportedException {
+	public Object clone() throws CloneNotSupportedException {
 		GameBoard cloned = (GameBoard) super.clone();
 		Piece[] pieces = (Piece[]) this.getPlayerPieces();
 		Piece[] clonedpieces = new Piece[pieces.length];

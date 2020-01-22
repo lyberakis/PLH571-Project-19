@@ -477,7 +477,7 @@ public class Player implements Cloneable {
                     		
                     		float util = evalSug(sugs);
                     		opponentModel[i].makeAction(util);
-                    		trustIndex[i] = opponentModel[i].getTrustIndex();
+                    		trustIndex[i] = opponentModel[i].getTrustIndex()*util;
                     		
                     	}
                 	}
