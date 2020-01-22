@@ -1,13 +1,13 @@
 package Pandemic.player;
 
 public class OpponentModel {
-	private int goodActionCounter;
-	private int totalActionCounter;
+	private float goodActionCounter;
+	private float totalActionCounter;
 	private float prevUtil;
 	
 	
 	public OpponentModel() {
-		totalActionCounter = goodActionCounter = 1;
+		totalActionCounter = goodActionCounter = 1f;
 		prevUtil = 0;
 	}
 	
@@ -17,7 +17,7 @@ public class OpponentModel {
 	
 	protected void makeAction(float util) {
 		totalActionCounter++;
-		goodActionCounter = (util>0.9*prevUtil)?goodActionCounter+1:goodActionCounter;
+		goodActionCounter = (util>0.6*prevUtil)?goodActionCounter+1:goodActionCounter;
 		prevUtil = util;
 	}
 	

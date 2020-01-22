@@ -473,10 +473,10 @@ public class Player implements Cloneable {
                 		if (!Variables.Suggestions[i].isEmpty()) {
                     		// Get suggestions from i-th player
                     		ArrayList<Action> sugs = Variables.Suggestions[i];
-                    		//System.out.println("Size: " + Variables.Suggestions[i].size());
+                    		System.out.println("Size: " + Variables.Suggestions[i].size());
                     		
                     		float util = evalSug(sugs);
-                    		opponentModel[0].makeAction(util);
+                    		opponentModel[i].makeAction(util);
                     		trustIndex[i] = opponentModel[i].getTrustIndex();
                     		
                     	}
@@ -488,12 +488,11 @@ public class Player implements Cloneable {
                 for (int i=0; i<trustIndex.length; i++) 
                 	maxIdex = (trustIndex[i]>trustIndex[maxIdex])?i:maxIdex;
                 
-                this.suggestions = Variables.Suggestions[maxIdex];
+               
+                //this.suggestions = Variables.Suggestions[maxIdex];
                 
             }
-            
-            //opponentModel[0].makeAction(evaluate(pandemicBoard));
-            
+                        
             
             // hand
             // ArrayList<City> neighbors = playerPiece.getLocationConnections();
@@ -595,10 +594,10 @@ public class Player implements Cloneable {
     	float util; 
     	
     	freeze();
-		for (Action a : sugs) {
+		for (Action a : (ArrayList<Action>)sugs.clone()) {
 			System.out.println(this.playerName + " doing " + a);
 			
-			/*if (a instanceof discoverCure)
+			if (a instanceof discoverCure)
 				discoverCure(((discoverCure) a).getCurrent_city(), ((discoverCure) a).getColorOfDisease()); 
 			else if (a instanceof charterFlight)
 				charterFlight(((charterFlight) a).getMoveFrom(), ((charterFlight) a).getMoveTo());
@@ -612,7 +611,6 @@ public class Player implements Cloneable {
 				treatDisease(((treatDisease) a).getLocation(), ((treatDisease) a).getColour());
 			else
 				continue;
-				*/
 		}
 		util = evaluate(pandemicBoard);
 		this.suggestions.clear();
