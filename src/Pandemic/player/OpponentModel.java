@@ -22,14 +22,14 @@ public class OpponentModel {
 	}
 	
 
-	protected final static int TranslateRole(String role) {
-		if (role.equals("QUARANTINE_SPECIALIST")) return 0;
-		if (role.equals("OPERATIONS_EXPERT")) return 1;
-		if (role.equals("SCIENTIST")) return 2;
-		if (role.equals("MEDIC")) return 3;
-		
-		return -1;
-	}
+	/*
+	 * protected final static int TranslateRole(String role) { if
+	 * (role.equals("QUARANTINE_SPECIALIST")) return 0; if
+	 * (role.equals("OPERATIONS_EXPERT")) return 1; if (role.equals("SCIENTIST"))
+	 * return 2; if (role.equals("MEDIC")) return 3;
+	 * 
+	 * return -1; }
+	 */
 	
 	
 

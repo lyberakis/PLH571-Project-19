@@ -61,4 +61,8 @@ public class discoverCure extends Action{
 		return false;
 		
 	}
+	
+	public String toString() {
+		return super.toString() + " at " + current_city + " color cured: " + colorOfDisease; 
+	}
 }

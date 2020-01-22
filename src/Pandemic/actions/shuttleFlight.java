@@ -39,4 +39,8 @@ public class shuttleFlight extends Action {
 
 	public void setMoveFrom(City moveFrom) {this.moveFrom = moveFrom;}
 	
+	public String toString() {
+		return super.toString() + " from " + moveFrom + " to " + moveTo;
+	}
+	
 }

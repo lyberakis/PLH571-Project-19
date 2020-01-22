@@ -38,4 +38,8 @@ public class buildResearchStation extends Action{
 
 	public void setHand_cards(ArrayList<City> hand_cards) {	this.hand_cards = hand_cards;}
 	
+	public String toString() {
+		return super.toString() + " at " + cityToResearchStation;
+	}
+	
 }

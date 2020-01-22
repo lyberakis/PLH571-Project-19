@@ -31,5 +31,9 @@ public class directFlight extends Action{
 		}
 		return false;
 	}
+	
+	public String toString() {
+		return super.toString() + " to " + moveTo;
+	}
 
 }

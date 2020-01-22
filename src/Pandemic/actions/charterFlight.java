@@ -37,7 +37,9 @@ public class charterFlight extends Action{
 	}
 
 
-	
+	public String toString() {
+		return super.toString() + " from " + moveFrom + " to " + moveTo;
+	}
 	
 	
 }

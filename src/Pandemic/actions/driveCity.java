@@ -42,4 +42,8 @@ public class driveCity extends Action{
 	    return false;
 	}
 	
+	public String toString() {
+		return super.toString() + " from " + moveFrom + " to " + moveTo;
+	}
+	
 }
