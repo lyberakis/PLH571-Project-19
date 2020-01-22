@@ -29,11 +29,18 @@ public class Player implements Cloneable {
     private OpponentModel[] opponentModel;
 
     // ------------for storing
-    private ArrayList<City> freezeCities = new ArrayList<City>();
     private int f_redCube, f_blueCubes, f_yellowCubes, f_blackCubes;
-    private ArrayList<Disease> f_diseases = new ArrayList<Disease>();
     private ArrayList<City> f_ResearchStation = new ArrayList<City>();
-    private City f1_location, f2_location, f3_location, f4_location;
+    private boolean cured[] = new boolean[4];
+    private boolean eliminated[] = new boolean[4];
+    private City f1_location;
+    private City f2_location;
+    private City f3_location;
+    private City f4_location;
+    private int cubes[][] = new int[48][4];
+    private boolean outs[] = new boolean[48];
+    private int dist[] = new int[48];
+    private int infect[] = new int[48];
     // --------------to return
 
     /*
@@ -593,7 +600,7 @@ public class Player implements Cloneable {
     private float evalSug(ArrayList<Action> sugs) {
     	float util; 
     	
-    	freeze();
+    	GameBoard clone = freeze();
 		for (Action a : (ArrayList<Action>)sugs.clone()) {
 			System.out.println(this.playerName + " doing " + a);
 			
@@ -614,7 +621,7 @@ public class Player implements Cloneable {
 		}
 		util = evaluate(pandemicBoard);
 		this.suggestions.clear();
-		unfreeze();
+		unfreeze(clone);
     	
 		return util;
 	}
@@ -670,32 +677,83 @@ public class Player implements Cloneable {
         return 100.f * discountFactor;
     }
 
-    private void freeze() {
-        freezeCities = (ArrayList<City>) pandemicBoard.getCities().clone();
-        f_redCube = pandemicBoard.redCubes;
-        f_blueCubes = pandemicBoard.blueCubes;
-        f_yellowCubes = pandemicBoard.yellowCubes;
-        f_blackCubes = pandemicBoard.blackCubes;
-        f_diseases = (ArrayList<Disease>) pandemicBoard.getDiseases().clone();
-        f_ResearchStation = (ArrayList<City>) pandemicBoard.getResearchCentres().clone();
-        f1_location = pandemicBoard.playerPieces[0].getLocation();
-        f2_location = pandemicBoard.playerPieces[1].getLocation();
-        f3_location = pandemicBoard.playerPieces[2].getLocation();
-        f4_location = pandemicBoard.playerPieces[3].getLocation();
+    private GameBoard freeze() {
+        for (int k = 0; k < pandemicBoard.cities.size(); k++) {
+            this.cubes[k][0] = pandemicBoard.cities.get(k).getRedCubes();
+            this.cubes[k][1] = pandemicBoard.cities.get(k).getBlueCubes();
+            this.cubes[k][2] = pandemicBoard.cities.get(k).getBlackCubes();
+            this.cubes[k][3] = pandemicBoard.cities.get(k).getYellowCubes();
+            this.infect[k] = pandemicBoard.cities.get(k).getInfectionLevel();
+            this.dist[k] = pandemicBoard.cities.get(k).getDistance();
+            this.outs[k] = pandemicBoard.cities.get(k).isHasOutbreak();
+        }
+        for (int k = 0; k < pandemicBoard.diseases.size(); k++) {
+            this.cured[k] = pandemicBoard.diseases.get(k).cured;
+            this.eliminated[k] = pandemicBoard.diseases.get(k).eliminated;
 
+        }
+
+        f_redCube = this.pandemicBoard.redCubes;
+        f_blueCubes = this.pandemicBoard.blueCubes;
+        f_yellowCubes = this.pandemicBoard.yellowCubes;
+        f_blackCubes = this.pandemicBoard.blackCubes;
+
+        // f_ResearchStation = (ArrayList<City>) this.pandemicBoard.getResearchCentres();
+        f_ResearchStation = new ArrayList<City>();
+        for (int k = 0; k < pandemicBoard.getResearchCentres().size(); k++) {
+            f_ResearchStation.add(pandemicBoard.getResearchCentres().get(k));
+        }
+        f1_location = pandemicBoard.playerPieces[0].location;
+        f2_location = pandemicBoard.playerPieces[1].location;
+        f3_location = pandemicBoard.playerPieces[2].location;
+        f4_location = pandemicBoard.playerPieces[3].location;
+        
+        GameBoard cloned = null;
+        try {
+            cloned = (GameBoard) pandemicBoard.clone();
+        } catch (Exception e) {
+            //TODO: handle exception
+        }
+        return cloned;
     }
 
-    private void unfreeze() {
-        pandemicBoard.cities = freezeCities;
-        pandemicBoard.redCubes = f_redCube;
-        pandemicBoard.blueCubes = f_blueCubes;
-        pandemicBoard.yellowCubes = f_yellowCubes;
-        pandemicBoard.blackCubes = f_blackCubes;
-        pandemicBoard.diseases = f_diseases;
-        pandemicBoard.playerPieces[0].setLocation(f1_location);
-        pandemicBoard.playerPieces[1].setLocation(f2_location);
-        pandemicBoard.playerPieces[2].setLocation(f3_location);
-        pandemicBoard.playerPieces[3].setLocation(f4_location);
+    private void unfreeze(GameBoard cloned) {
+        this.pandemicBoard = cloned;
+        for (int k = 0; k < pandemicBoard.cities.size(); k++) {
+            pandemicBoard.cities.get(k).setRedCubes(this.cubes[k][0]);
+            pandemicBoard.cities.get(k).setBlueCubes(this.cubes[k][1]);
+            pandemicBoard.cities.get(k).setBlackCubes(this.cubes[k][2]);
+            pandemicBoard.cities.get(k).setYellowCubes(this.cubes[k][3]);
+            pandemicBoard.cities.get(k).setInfectionLevel(this.infect[k]);
+            pandemicBoard.cities.get(k).setDistance(this.dist[k]);
+            pandemicBoard.cities.get(k).setHasOutbreak(this.outs[k]);
+        }
+
+        this.pandemicBoard.redCubes = f_redCube;
+        this.pandemicBoard.blueCubes = f_blueCubes;
+        this.pandemicBoard.yellowCubes = f_yellowCubes;
+        this.pandemicBoard.blackCubes = f_blackCubes;
+
+        for (int k = 0; k < pandemicBoard.diseases.size(); k++) {
+            pandemicBoard.diseases.get(k).setCured((this.cured[k]));
+            pandemicBoard.diseases.get(k).setEliminated(((this.eliminated[k])));
+
+        }
+        Variables.CITY_WITH_RESEARCH_STATION = new ArrayList<City>();
+        for (int k = 0; k < pandemicBoard.getResearchCentres().size(); k++) {
+            Variables.CITY_WITH_RESEARCH_STATION.add(f_ResearchStation.get(k));
+        }
+
+        pandemicBoard.playerPieces[0].location = f1_location;
+        pandemicBoard.playerPieces[1].location = f2_location;
+        pandemicBoard.playerPieces[2].location = f3_location;
+        pandemicBoard.playerPieces[3].location = f4_location;
+
+        this.pandemicBoard.playerPieces[0].setLocation(f1_location);
+        this.pandemicBoard.playerPieces[1].setLocation(f2_location);
+        this.pandemicBoard.playerPieces[2].setLocation(f3_location);
+        this.pandemicBoard.playerPieces[3].setLocation(f4_location);
+
         Variables.CITY_WITH_RESEARCH_STATION = f_ResearchStation;
     }
 
