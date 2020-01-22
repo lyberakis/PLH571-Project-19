@@ -210,7 +210,7 @@ public  class City implements Cloneable{
 	}
 	
 	public String toString() {
-		return name;
+		return getName();
 	}
 	
 }

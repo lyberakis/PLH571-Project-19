@@ -26,7 +26,7 @@ public class Player implements Cloneable {
     ArrayList<City> hand; // hand_cards maybe from action
     String[] possibleColour = { "Red", "Blue", "Yellow", "Black" };
     ArrayList<Action> suggestions = new ArrayList<Action>();
-    private OpponentModel[] opponentModel = new OpponentModel[4];
+    private OpponentModel[] opponentModel;
 
     // ------------for storing
     private ArrayList<City> freezeCities = new ArrayList<City>();
@@ -45,6 +45,9 @@ public class Player implements Cloneable {
         playerAction = 4;
         tactic = 50;
         playerRole = pRole;
+        
+        opponentModel = new OpponentModel[4];
+        for (int i=0; i<4; i++) opponentModel[i] = new OpponentModel();
     }
 
     public void setGameBoard(GameBoard currentBoard) {
@@ -462,6 +465,31 @@ public class Player implements Cloneable {
                     decideDoctor();
                     break;
                 }
+                
+                // Check suggestions
+                float[] trustIndex = new float[4]; 
+                for (int i=0; i<4; i++) { // Check for everyone else
+                	if  (Variables.Suggestions[i] != null) {
+                		if (!Variables.Suggestions[i].isEmpty()) {
+                    		// Get suggestions from i-th player
+                    		ArrayList<Action> sugs = Variables.Suggestions[i];
+                    		//System.out.println("Size: " + Variables.Suggestions[i].size());
+                    		
+                    		float util = evalSug(sugs);
+                    		opponentModel[0].makeAction(util);
+                    		trustIndex[i] = opponentModel[i].getTrustIndex();
+                    		
+                    	}
+                	}
+                }
+                
+                // Suggestions' evaluation
+                int maxIdex = 0;
+                for (int i=0; i<trustIndex.length; i++) 
+                	maxIdex = (trustIndex[i]>trustIndex[maxIdex])?i:maxIdex;
+                
+                this.suggestions = Variables.Suggestions[maxIdex];
+                
             }
             
             //opponentModel[0].makeAction(evaluate(pandemicBoard));
@@ -563,7 +591,37 @@ public class Player implements Cloneable {
         }
     }
 
-    private City getDiseaseHub() {
+    private float evalSug(ArrayList<Action> sugs) {
+    	float util; 
+    	
+    	freeze();
+		for (Action a : sugs) {
+			System.out.println(this.playerName + " doing " + a);
+			
+			/*if (a instanceof discoverCure)
+				discoverCure(((discoverCure) a).getCurrent_city(), ((discoverCure) a).getColorOfDisease()); 
+			else if (a instanceof charterFlight)
+				charterFlight(((charterFlight) a).getMoveFrom(), ((charterFlight) a).getMoveTo());
+			else if (a instanceof directFlight)
+				directFlight(this.playerPiece.location, ((directFlight) a).getMoveTo());
+			else if (a instanceof driveCity)
+				driveCity(((driveCity) a).getMoveFrom(), ((driveCity) a).getMoveTo());
+			else if (a instanceof shuttleFlight)
+				shuttleFlight(((shuttleFlight) a).getMoveFrom(), ((shuttleFlight) a).getMoveTo());
+			else if (a instanceof treatDisease)
+				treatDisease(((treatDisease) a).getLocation(), ((treatDisease) a).getColour());
+			else
+				continue;
+				*/
+		}
+		util = evaluate(pandemicBoard);
+		this.suggestions.clear();
+		unfreeze();
+    	
+		return util;
+	}
+
+	private City getDiseaseHub() {
         City hub = null;
         int maxCubes = 0;
         for (City city : pandemicBoard.get3CubeCities()) {
