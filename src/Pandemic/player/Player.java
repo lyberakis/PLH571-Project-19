@@ -484,8 +484,10 @@ public class Player implements Cloneable {
         switch(agentType) {
             case "default":
                 this.makeDecisionDefault(friend_hand, Role, friend_location);
+                break;
             case "original": 
                 this.makeDecisionOriginal(friend_hand, Role, friend_location);
+                break;
         }
     }
 
