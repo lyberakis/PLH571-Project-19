@@ -387,17 +387,37 @@ public class Player implements Cloneable {
      **********************************************************************************/
     // ---------------------------------------------------------------------------------
     private void decideDoctor() {
-        if (!tryTreat(3)) {
-            if (!go3CubeCities()) {
-                tryTreat(2);
-                if (!go2CubeCities()) {
-                    tryTreat(1);
-                    if (!go1CubeCities()) {
-                        driveRandom();
-                    }
+    	// Check for cured diseases
+    	String color = null;
+    	City dHub = getDiseaseHub();
+    	
+    	for (Disease d : pandemicBoard.diseases) {
+    		discoverCure(playerPiece.getLocation(), d.getColour());
+    		if (d.cured && !d.eliminated) {
+    			color = d.colour;
+    			break;
+    		}
+    	}
+    	
+    	// Drive to the city with this color
+    	if (dHub != null) {
+    		getDistances(new ArrayList<City>(Arrays.asList(dHub)));
+        	City toDriveTo = calculateDestination();
+    	} 
+    	
+    	// Can go treat now
+    	if (!tryTreat(3)) {
+    		if (!go3CubeCities()) {
+    			tryTreat(2);
+    			if (!go2CubeCities()) {
+    				tryTreat(1);
+    				if (!go1CubeCities()) {
+    					driveRandom();
+    				}
                 }
-            }
-        }
+           }
+       }    		
+
     }
 
     private void decideScientist() {
@@ -564,22 +584,24 @@ public class Player implements Cloneable {
                     		ArrayList<Action> sugs = Variables.Suggestions[i];
                     		System.out.println("Size: " + Variables.Suggestions[i].size());
                     		
+                    		// Suggestions' evaluation
                     		float util = evalSug(sugs);
                     		opponentModel[i].makeAction(util);
                     		trustIndex[i] = opponentModel[i].getTrustIndex()*util;
                     		
+                    	} else {
+                    		trustIndex[i] = (float) (evaluate(this.pandemicBoard)*0.9);
                     	}
                 	}
                 }
                 
-                // Suggestions' evaluation
+                // Suggestions' selection
                 int maxIdex = 0;
                 for (int i=0; i<trustIndex.length; i++) 
                 	maxIdex = (trustIndex[i]>trustIndex[maxIdex])?i:maxIdex;
                 
-               
-                //this.suggestions = Variables.Suggestions[maxIdex];
-                
+                this.suggestions.clear();
+                for (Action a : Variables.Suggestions[maxIdex]) this.suggestions.add(a);                               
             }
                         
             
