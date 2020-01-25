@@ -388,7 +388,35 @@ public class Player implements Cloneable {
     }
 
     private void decideScientist() {
-        decideDoctor();
+    	int black=0, blue=0, yellow=0, red=0;
+    	for (int i=0; i<hand.size(); i++) {
+    		if(hand.get(i).getColour().equals("Red"))
+    			red++;
+    		else if(hand.get(i).getColour().equals("Yellow"))
+    			yellow++;
+    		else if(hand.get(i).getColour().equals("Black"))
+    			black++;
+    		else
+    			blue++;
+    	}
+    	if (red>2 || black>2 || blue>2 || yellow>2) {
+    		ArrayList<City> researchStations = pandemicBoard.getResearchCentres();
+    		for (int j=0; j<researchStations.size(); j++) {	
+    			if (playerPiece.getLocation().equals(researchStations.get(j))) {
+    				if (red>2)
+    					discoverCure(playerPiece.getLocation(), "Red");
+    				else if (black>2)
+    					discoverCure(playerPiece.getLocation(), "Black");
+    				else if (yellow>2)
+    					discoverCure(playerPiece.getLocation(), "Yellow");
+    				else
+    					discoverCure(playerPiece.getLocation(), "Blue");
+    				return;
+    			}
+    		}
+    		tryDriveResearchStation();
+    	}else
+    		decideDoctor();
     }
 
     void decideOpsExpert() {
