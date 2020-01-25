@@ -419,10 +419,9 @@ public class SimulatePandemic {
                          * player in command (The player who choose the final moves) and don't have
                          * knowledge of the cards of other players
                          */
-                        // System.out.println("------------------------------------");
-                        // System.out.println("sug:"+ (z+1) +" " +gamePlayers[z].getPlayerName() + "
-                        // make suggestion for "+ gamePlayers[i].getPlayerName());
-                        // System.out.println("------------------------------------");
+                        System.out.println("------------------------------------");
+                        System.out.println("sug:"+ (z+1) +" " +gamePlayers[z].getPlayerName() + "make suggestion for "+ gamePlayers[i].getPlayerName());
+                        System.out.println("------------------------------------");
 
                         while (gamePlayers[z].getPlayerAction() > 0 && !gameOver) {
                             gamePlayers[z].makeDecision(gamePlayers[i].getHand(), gamePlayers[i].getPlayerRole(),
@@ -532,9 +531,9 @@ public class SimulatePandemic {
 
             turns++;
             if (!checkGameOver()) {
-                // System.out.println("================================================");
-                // System.out.println("Ending turn " + turns + " everybody has had a go.");
-                // System.out.println("================================================");
+                System.out.println("================================================");
+                System.out.println("Ending turn " + turns + " everybody has had a go.");
+                System.out.println("================================================");
             }
         }
         
