@@ -28,6 +28,7 @@ public class Player implements Cloneable {
     ArrayList<Action> suggestions = new ArrayList<Action>();
     String agentType = "default";
     private OpponentModel[] opponentModel;
+    int roundCount = 1;
 
     // ------------for storing
     private ArrayList<City> freezeCities = new ArrayList<City>();
@@ -448,38 +449,49 @@ public class Player implements Cloneable {
     			}
     		}
     		tryDriveResearchStation();
-    	}else
-    		decideDoctor();
+        }
+        else {
+            decideDoctor();
+        }
     }
 
+    City researchStationTarget = null;
+
     void decideOpsExpert() {
-        City hub = getDiseaseHub();
-
-        if (hub == null) {
+        if (Variables.GET_CITIES_WITH_RESEARCH_STATION().size() == 6) {
             decideDoctor();
-            return;
         }
-
-        if (playerPiece.location.getName().equals(hub.getName())) {
-            if (!buildResearchStation()) {
+        else {
+            if (researchStationTarget == null) {
+                researchStationTarget = getDiseaseHub(Variables.GET_CITIES_WITH_RESEARCH_STATION());
+            }
+        
+            if (researchStationTarget == null) {
                 decideDoctor();
                 return;
-            } else {
-                return;
+            }
+
+            if (playerPiece.location.getName().equals(researchStationTarget.getName())) {
+                if (!buildResearchStation()) {
+                    decideDoctor();
+                    return;
+                } else {
+                    researchStationTarget = null;
+                    return;
+                }
+            }
+
+            getDistances(new ArrayList<City>(Arrays.asList(researchStationTarget)));
+            City toDriveTo = calculateDestination();
+
+            if (!driveCity(playerPiece.location, toDriveTo)) {
+                decideDoctor();
             }
         }
-
-        getDistances(new ArrayList<City>(Arrays.asList(hub)));
-        City toDriveTo = calculateDestination();
-
-        if (!driveCity(playerPiece.location, toDriveTo)) {
-            decideDoctor();
-        }
-
     }
 
     private void decideQuarantineSpecialist() {
-        City hub = getDiseaseHub();
+        City hub = getDiseaseHub(null);
 
         if (hub == null) {
             decideDoctor();
@@ -499,7 +511,7 @@ public class Player implements Cloneable {
         }
     }
 
-    public void makeDecision(ArrayList<City> friend_hand, String Role, City friend_location) 
+    public void makeDecision(ArrayList<City> friend_hand, String Role, City friend_location)
     {
         switch(agentType) {
             case "default":
@@ -508,6 +520,10 @@ public class Player implements Cloneable {
             case "original": 
                 this.makeDecisionOriginal(friend_hand, Role, friend_location);
                 break;
+        }
+
+        if (friend_hand == null && playerAction == 0) {
+            roundCount++;
         }
     }
 
@@ -730,10 +746,16 @@ public class Player implements Cloneable {
 		return util;
 	}
 
-	private City getDiseaseHub() {
+	private City getDiseaseHub(ArrayList<City> excludeList) {
         City hub = null;
         int maxCubes = 0;
         for (City city : pandemicBoard.get3CubeCities()) {
+            if (excludeList != null) {
+                if(excludeList.contains(city)) {
+                    continue;
+                }
+            }
+
             int cubes = city.getMaxCube();
             for (City neighbor : city.getNeighbors()) {
                 cubes += neighbor.getMaxCube();
@@ -743,6 +765,10 @@ public class Player implements Cloneable {
                 maxCubes = cubes;
                 hub = city;
             }
+        }
+
+        if (maxCubes <= 3) {
+            return null;
         }
 
         return hub;
