@@ -29,7 +29,7 @@ with open(sys.argv[1]) as csvFile:
                 
 
 print(f"Sample size: {runCount}")
-print(f"Winning: {round((wonCount/runCount)*100, 2)}%\nLossing: {round((lossCount/runCount)*100, 2)}%")
+print(f"Winning: {round((wonCount/runCount)*100, 2)}%\nLosing: {round((lossCount/runCount)*100, 2)}%")
 print(f"\tRun out of cards: {round((runOutOfCardsCount/lossCount)*100, 2)}%")
 print(f"\tRun out of cubes: {round((runOutOfCubesCount/lossCount)*100, 2)}%")
 print(f"\tToo many outbreaks: {round((tooManyOutbreakCount/lossCount)*100, 2)}%")

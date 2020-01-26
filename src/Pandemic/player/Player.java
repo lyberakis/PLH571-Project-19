@@ -1,18 +1,23 @@
 package Pandemic.player;
 
-import java.util.Random;
-import java.util.Scanner;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Random;
+
 import Pandemic.Gameboard.GameBoard;
-import Pandemic.Gameboard.SimulatePandemic;
+import Pandemic.actions.Action;
+import Pandemic.actions.buildResearchStation;
+import Pandemic.actions.charterFlight;
+import Pandemic.actions.directFlight;
+import Pandemic.actions.discoverCure;
+import Pandemic.actions.driveCity;
+import Pandemic.actions.shuttleFlight;
+import Pandemic.actions.treatDisease;
 import Pandemic.cities.City;
 import Pandemic.variables.Disease;
 import Pandemic.variables.Piece;
 import Pandemic.variables.Variables;
-import Pandemic.actions.*;
-import java.util.ArrayList;
-import java.util.Collections;
 
 public class Player implements Cloneable {
 
@@ -29,6 +34,7 @@ public class Player implements Cloneable {
     String agentType = "default";
     private OpponentModel[] opponentModel;
     int roundCount = 1;
+    boolean givingSuggestions = false;
 
     // ------------for storing
     private ArrayList<City> freezeCities = new ArrayList<City>();
@@ -58,7 +64,7 @@ public class Player implements Cloneable {
         playerAction = 4;
         tactic = 50;
         playerRole = pRole;
-        agentType = agentType;
+        this.agentType = agentType;
 
         opponentModel = new OpponentModel[4];
         for (int i=0; i<4; i++) opponentModel[i] = new OpponentModel();
@@ -147,7 +153,12 @@ public class Player implements Cloneable {
                 toDiscard = i;
             }
         }
-        pandemicBoard.addPlayerCardDiscard(hand.get(toDiscard));// remove from playerDeck to put in PlayerDiscardDeck
+
+        if (!givingSuggestions) {
+            pandemicBoard.addPlayerCardDiscard(hand.get(toDiscard));// remove from playerDeck to put in
+                                                                   // PlayerDiscardDeck
+        }
+
         hand.remove(toDiscard);
     }
 
@@ -388,26 +399,33 @@ public class Player implements Cloneable {
      **********************************************************************************/
     // ---------------------------------------------------------------------------------
     private void decideDoctor() {
-    	// Check for cured diseases
-    	String color = null;
-    	City dHub = getDiseaseHub();
+    	// // Check for cured diseases
+    	// String color = null;
+    	// City dHub = getDiseaseHub(null);
     	
-    	for (Disease d : pandemicBoard.diseases) {
-    		discoverCure(playerPiece.getLocation(), d.getColour());
-    		if (d.cured && !d.eliminated) {
-    			color = d.colour;
-    			break;
-    		}
-    	}
+    	// for (Disease d : pandemicBoard.diseases) {
+    	// 	discoverCure(playerPiece.getLocation(), d.getColour());
+    	// 	if (d.cured && !d.eliminated) {
+    	// 		color = d.colour;
+    	// 		break;
+    	// 	}
+    	// }
     	
-    	// Drive to the city with this color
-    	if (dHub != null) {
-    		getDistances(new ArrayList<City>(Arrays.asList(dHub)));
-        	City toDriveTo = calculateDestination();
-    	} 
+    	// // Drive to the city with this color
+    	// if (dHub != null) {
+    	// 	getDistances(new ArrayList<City>(Arrays.asList(dHub)));
+        //     City toDriveTo = calculateDestination();
+            
+        //     driveCity(playerPiece.location, toDriveTo);
+    	// } 
     	
     	// Can go treat now
-    	if (!tryTreat(3)) {
+    	decideDoctorBasic();
+    }
+
+    private void decideDoctorBasic()
+    {
+        if (!tryTreat(3)) {
     		if (!go3CubeCities()) {
     			tryTreat(2);
     			if (!go2CubeCities()) {
@@ -417,8 +435,7 @@ public class Player implements Cloneable {
     				}
                 }
            }
-       }    		
-
+       }
     }
 
     private void decideScientist() {
@@ -451,7 +468,7 @@ public class Player implements Cloneable {
     		tryDriveResearchStation();
         }
         else {
-            decideDoctor();
+            decideDoctorBasic();
         }
     }
 
@@ -459,7 +476,7 @@ public class Player implements Cloneable {
 
     void decideOpsExpert() {
         if (Variables.GET_CITIES_WITH_RESEARCH_STATION().size() == 6) {
-            decideDoctor();
+            decideDoctorBasic();
         }
         else {
             if (researchStationTarget == null) {
@@ -467,13 +484,13 @@ public class Player implements Cloneable {
             }
         
             if (researchStationTarget == null) {
-                decideDoctor();
+                decideDoctorBasic();
                 return;
             }
 
             if (playerPiece.location.getName().equals(researchStationTarget.getName())) {
                 if (!buildResearchStation()) {
-                    decideDoctor();
+                    decideDoctorBasic();
                     return;
                 } else {
                     researchStationTarget = null;
@@ -485,29 +502,35 @@ public class Player implements Cloneable {
             City toDriveTo = calculateDestination();
 
             if (!driveCity(playerPiece.location, toDriveTo)) {
-                decideDoctor();
+                decideDoctorBasic();
             }
         }
     }
 
+    City hubTarget = null;
+    int targetRound = 1;
+
     private void decideQuarantineSpecialist() {
-        City hub = getDiseaseHub(null);
+        if (hubTarget == null || targetRound != roundCount) {
+            hubTarget = getDiseaseHub(null);
+            targetRound = roundCount;
+        }
 
-        if (hub == null) {
-            decideDoctor();
+        if (hubTarget == null) {
+            decideDoctorBasic();
             return;
         }
 
-        if (playerPiece.location.getName().equals(hub.getName())) {
-            decideDoctor();
+        if (playerPiece.location.getName().equals(hubTarget.getName())) {
+            decideDoctorBasic();
             return;
         }
 
-        getDistances(new ArrayList<City>(Arrays.asList(hub)));
+        getDistances(new ArrayList<City>(Arrays.asList(hubTarget)));
         City toDriveTo = calculateDestination();
 
         if (!driveCity(playerPiece.location, toDriveTo)) {
-            decideDoctor();
+            decideDoctorBasic();
         }
     }
 
@@ -516,6 +539,12 @@ public class Player implements Cloneable {
         switch(agentType) {
             case "default":
                 this.makeDecisionDefault(friend_hand, Role, friend_location);
+                break;
+            case "defaultWSuggestions":
+                this.makeDecisionDefaultWithSuggestions(friend_hand, Role, friend_location);
+                break;
+            case "defaultWSuggestionsWOpModeling":
+                this.makeDecisionDefaultWithSuggestionsWithOpModeling(friend_hand, Role, friend_location);
                 break;
             case "original": 
                 this.makeDecisionOriginal(friend_hand, Role, friend_location);
@@ -569,9 +598,191 @@ public class Player implements Cloneable {
 
         // This is going to be called 4 times
         if (friend_hand == null) { // Our turn
-            // freeze();
-            // System.out.println("Util: " + evaluate(this.pandemicBoard));
-            // decideDoctor();
+            if (!checkTryCure()) {
+                switch (Role) {
+                case "MEDIC":
+                    decideDoctor();
+                    break;
+                case "SCIENTIST":
+                    decideScientist();
+                    break;
+                case "OPERATIONS_EXPERT":
+                    decideOpsExpert();
+                    break;
+                case "QUARANTINE_SPECIALIST":
+                    decideQuarantineSpecialist();
+                    break;
+                default:
+                    decideDoctor();
+                    break;
+                }
+                
+                // // Check suggestions
+                // float[] trustIndex = new float[4]; 
+                // for (int i=0; i<4; i++) { // Check for everyone else
+                // 	if  (Variables.Suggestions[i] != null) {
+                // 		if (!Variables.Suggestions[i].isEmpty()) {
+                //     		// Get suggestions from i-th player
+                //     		ArrayList<Action> sugs = Variables.Suggestions[i];
+                //     		System.out.println("Size: " + Variables.Suggestions[i].size());
+                    		
+                //     		// Suggestions' evaluation
+                //     		float util = evalSug(sugs);
+                //     		opponentModel[i].makeAction(util);
+                //     		trustIndex[i] = opponentModel[i].getTrustIndex()*util;
+                    		
+                //     	} else {
+                //     		trustIndex[i] = (float) (evaluate(this.pandemicBoard)*0.9);
+                //     	}
+                // 	}
+                // }
+                
+                // // Suggestions' selection
+                // int maxIdex = 0;
+                // for (int i=0; i<trustIndex.length; i++) 
+                // 	maxIdex = (trustIndex[i]>trustIndex[maxIdex])?i:maxIdex;
+                
+                // this.suggestions.clear();
+                // for (Action a : Variables.Suggestions[maxIdex]) this.suggestions.add(a);                            
+            }
+
+        } else { // Send a suggestion
+        	System.out.println("--------------------------Suggestion started--------------------------------");
+            givingSuggestions = true;
+            playerPiece.setLocation(friend_location);
+        	String holdRole = playerRole;
+        	playerRole = Role;
+        	ArrayList<City> holdHand = hand;
+            hand = (ArrayList<City>) friend_hand.clone();
+            
+            City holdTarget = researchStationTarget;
+            researchStationTarget = null;
+
+            City holdHubTarget = hubTarget;
+            hubTarget = null;
+            int holdTargetRound = targetRound;
+
+            driveRandom();
+            driveRandom();
+            driveRandom();
+            driveRandom();
+
+            // while (suggestions.size() != 4) {
+	        // 	if (!checkTryCure()) {
+	        //         switch (Role) {
+	        //         case "MEDIC":
+	        //             decideDoctor();
+	        //             break;
+	        //         case "SCIENTIST":
+	        //             decideScientist();
+	        //             break;
+            //         case "OPERATIONS_EXPERT":
+            //             decideOpsExpert();
+	        //             break;
+            //         case "QUARANTINE_SPECIALIST":
+            //             decideQuarantineSpecialist();
+	        //             break;
+	        //         default:
+	        //             decideDoctor();
+	        //             break;
+	        //         }
+            //     }
+        	// }
+            
+            hubTarget = holdHubTarget;
+            targetRound = holdTargetRound;
+
+            researchStationTarget = holdTarget;
+
+            playerRole = holdRole;
+            hand = holdHand;
+            givingSuggestions = false;
+        	System.out.println("--------------------------Suggestion ended--------------------------------");
+        }
+    }
+
+    public void makeDecisionDefaultWithSuggestions(ArrayList<City> friend_hand, String Role, City friend_location) {
+        // driveCity(playerPiece.getLocation(),playerPiece.getLocation().getNeighbors().get(0));
+        // take Variables.Suggestions and build model for others player
+
+        // This is going to be called 4 times
+        if (friend_hand == null) { // Our turn
+            if (!checkTryCure()) {
+                switch (Role) {
+                case "MEDIC":
+                    decideDoctor();
+                    break;
+                case "SCIENTIST":
+                    decideScientist();
+                    break;
+                case "OPERATIONS_EXPERT":
+                    decideOpsExpert();
+                    break;
+                case "QUARANTINE_SPECIALIST":
+                    decideQuarantineSpecialist();
+                    break;
+                default:
+                    decideDoctor();
+                    break;
+                }                    
+            }
+
+        } else { // Send a suggestion
+        	System.out.println("--------------------------Suggestion started--------------------------------");
+            givingSuggestions = true;
+            playerPiece.setLocation(friend_location);
+        	String holdRole = playerRole;
+        	playerRole = Role;
+        	ArrayList<City> holdHand = hand;
+            hand = (ArrayList<City>) friend_hand.clone();
+            
+            City holdTarget = researchStationTarget;
+            researchStationTarget = null;
+
+            City holdHubTarget = hubTarget;
+            hubTarget = null;
+            int holdTargetRound = targetRound;
+
+            while (suggestions.size() != 4) {
+	        	if (!checkTryCure()) {
+	                switch (Role) {
+	                case "MEDIC":
+	                    decideDoctor();
+	                    break;
+	                case "SCIENTIST":
+	                    decideScientist();
+	                    break;
+                    case "OPERATIONS_EXPERT":
+                        decideOpsExpert();
+	                    break;
+                    case "QUARANTINE_SPECIALIST":
+                        decideQuarantineSpecialist();
+	                    break;
+	                default:
+	                    decideDoctor();
+	                    break;
+	                }
+                }
+        	}
+            
+            hubTarget = holdHubTarget;
+            targetRound = holdTargetRound;
+
+            researchStationTarget = holdTarget;
+
+            playerRole = holdRole;
+            hand = holdHand;
+            givingSuggestions = false;
+        	System.out.println("--------------------------Suggestion ended--------------------------------");
+        }
+    }
+
+    public void makeDecisionDefaultWithSuggestionsWithOpModeling(ArrayList<City> friend_hand, String Role, City friend_location) {
+        // driveCity(playerPiece.getLocation(),playerPiece.getLocation().getNeighbors().get(0));
+        // take Variables.Suggestions and build model for others player
+
+        // This is going to be called 4 times
+        if (friend_hand == null) { // Our turn
             if (!checkTryCure()) {
                 switch (Role) {
                 case "MEDIC":
@@ -617,78 +828,26 @@ public class Player implements Cloneable {
                 	maxIdex = (trustIndex[i]>trustIndex[maxIdex])?i:maxIdex;
                 
                 this.suggestions.clear();
-                for (Action a : Variables.Suggestions[maxIdex]) this.suggestions.add(a);                               
+                for (Action a : Variables.Suggestions[maxIdex]) this.suggestions.add(a);             
             }
-                        
-            
-            // hand
-            // ArrayList<City> neighbors = playerPiece.getLocationConnections();
-
-            // unfreeze();
-            // ==============================================================================
-            // System.out.println(Variables.Suggestions.length);
-            // for (ArrayList<Action> suggestion : Variables.Suggestions) {
-            // Variables.Suggestions is an array of 4 arrays
-            // Variables.Suggestions has an empty array (current user's)
-            // suggestion is an array of 4 Actions
-            // System.out.println(suggestion);
-            // }
-
-            // Getting info for the players
-            // this.pandemicBoard.playerPieces[0].owner.playerName;
-            // ==============================================================================
-
-            // Strategy...
-            // System.out.print(this.getPlayerName() + " is thinking..... ");
-            // boolean checkCure = checkCureWorthIt();
-            // if (checkCure)
-            // {
-            // System.out.println("might be worth trying to find a cure.");
-            // checkTryCure();
-            // }
-            // if (!checkCure && (getDistanceResearch() > 3) && (tactic > 0) )
-            // {
-            // tactic--;
-            // System.out.print("They are far enough from a research station to consider
-            // building one.");
-            // if (!buildResearchStation())
-            // {
-            // System.out.println(" Can't find the required card.");
-            // rollDice();
-            // }
-            // }
-            // else if (!checkCure)
-            // {
-            // rollDice();
-            // rollDice();
-            // rollDice();
-            // rollDice();
-            // tactic--;
-            // }
-
-            // if (tactic < -500 )
-            // {
-            // System.out.println("out of ideas, will drive randomly");
-            // driveRandom();
-            // }
-            // tactic--;
 
         } else { // Send a suggestion
         	System.out.println("--------------------------Suggestion started--------------------------------");
-            Piece holdPiece = playerPiece;
-            Piece [] pieces = pandemicBoard.getPlayerPieces();
-            for (int i = 0; i < pieces.length; i++) {
-                if (pieces[i].owner.getPlayerRole().compareTo(Role) == 0) {
-                    playerPiece = pieces[i];
-                    break;
-                }
-            }
+            givingSuggestions = true;
+            playerPiece.setLocation(friend_location);
         	String holdRole = playerRole;
         	playerRole = Role;
         	ArrayList<City> holdHand = hand;
-        	hand = friend_hand;
-        	int countSuggestions=0;
-        	while (countSuggestions!=4) {
+            hand = (ArrayList<City>) friend_hand.clone();
+            
+            City holdTarget = researchStationTarget;
+            researchStationTarget = null;
+
+            City holdHubTarget = hubTarget;
+            hubTarget = null;
+            int holdTargetRound = targetRound;
+
+            while (suggestions.size() != 4) {
 	        	if (!checkTryCure()) {
 	                switch (Role) {
 	                case "MEDIC":
@@ -697,22 +856,27 @@ public class Player implements Cloneable {
 	                case "SCIENTIST":
 	                    decideScientist();
 	                    break;
-	                case "OPERATIONS_EXPERT":
-	                    decideOpsExpert();
+                    case "OPERATIONS_EXPERT":
+                        decideOpsExpert();
 	                    break;
-	                case "QUARANTINE_SPECIALIST":
-	                    decideQuarantineSpecialist();
+                    case "QUARANTINE_SPECIALIST":
+                        decideQuarantineSpecialist();
 	                    break;
 	                default:
 	                    decideDoctor();
 	                    break;
 	                }
-	            }
-	        	countSuggestions++;
+                }
         	}
-        	playerRole=holdRole;
-        	playerPiece=holdPiece;
-        	hand = holdHand;
+            
+            hubTarget = holdHubTarget;
+            targetRound = holdTargetRound;
+
+            researchStationTarget = holdTarget;
+
+            playerRole = holdRole;
+            hand = holdHand;
+            givingSuggestions = false;
         	System.out.println("--------------------------Suggestion ended--------------------------------");
         }
     }

@@ -21,9 +21,16 @@ public class SimulatePandemic {
         Player jack;
         Player deadpool;
 
-        String agent = "default";
+        boolean extraInfo = false;
         if (args.length >= 1) {
-            agent = args[0];
+            if (args[0].toLowerCase().equals("true")) {
+                extraInfo = true;
+            }
+        }
+
+        String agent = "default";
+        if (args.length >= 2) {
+            agent = args[1];
         }
 
         unabomber = new Player("Unabomber", "QUARANTINE_SPECIALIST", agent);
@@ -55,7 +62,7 @@ public class SimulatePandemic {
         boolean gameWon = SimulatePandemic.gameWon;
         int lossReason = testgame.lossReason;
 
-        if (false) {
+        if (extraInfo) {
 
             for (int i = 0; i < numberOfRounds; i++) {
                 System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
@@ -289,9 +296,9 @@ public class SimulatePandemic {
             System.out.printf("%60s\n", "Lost the game run out off cubes to use.");
         }
 
-        if (args.length == 2) {
+        if (args.length >= 3) {
             try {
-                FileWriter writter = new FileWriter(args[1], true);
+                FileWriter writter = new FileWriter(args[2], true);
                 writter.write(gameWon + "," + lossReason + "\n");
                 writter.close();
             } catch (IOException e) {
@@ -427,7 +434,7 @@ public class SimulatePandemic {
                             gamePlayers[z].makeDecision(gamePlayers[i].getHand(), gamePlayers[i].getPlayerRole(),
                                     gamePlayers[i].getPlayerPiece().location);
                             Variables.Suggestions[z] = gamePlayers[z].getSuggestions();
-                            checkGameOver();
+                            // checkGameOver();
                         }
                     }
                     unfreeze(cloned);
